@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VeganApp</string>
+    <string name="title_cook_book">Книга рецептов</string>
+    <string name="title_fav_recipes">Избранное</string>
+    <string name="complexity">Сложность</string>
+</resources>

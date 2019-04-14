@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "336030530140",
+    "firebase_url": "https://vegan-app-22872.firebaseio.com",
+    "project_id": "vegan-app-22872",
+    "storage_bucket": "vegan-app-22872.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336030530140:android:9f111fd5d47fdb30",
+        "android_client_info": {
+          "package_name": "com.example.veganapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "336030530140-ob2gbkrm9i6iokmjc7ral2gdpcpij3lg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.veganapp",
+            "certificate_hash": "0fde641873100a42fd3b62cd1c907ecfe274050f"
+          }
+        },
+        {
+          "client_id": "336030530140-g4ob92vmt5qki1bh5tumb1d3eu6b9d3r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ_4795C2OlIunuSiI7ku224GWfAVzIcY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "336030530140-g4ob92vmt5qki1bh5tumb1d3eu6b9d3r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

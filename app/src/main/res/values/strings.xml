@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">VeganApp</string>
+    <string name="title_cook_book">Cook Book</string>
+    <string name="title_fav_recipes">Favourite</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="banner_ad_unit_id">ca-app-pub-6896399861367141/1518357113</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="complexity">Complexity</string>
+</resources>
