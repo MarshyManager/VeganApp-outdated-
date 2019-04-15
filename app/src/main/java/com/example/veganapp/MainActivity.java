@@ -13,9 +13,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -26,16 +28,17 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements RecipesFragment.OnListFragmentInteractionListener,
         CookInstructionFragment.OnFragmentInteractionListener, RecipesFragment.OnLikeFragmentInteractionListener {
 
+    final String APP_PREFERENCES = "settings";
 
-    private JsonClasses.MainJson RnR;
-    private List<JsonClasses.Recipe> recipes;
-    private List<JsonClasses.Restaurant> restaurants;
-    private StorageReference mStorageRef;
-    private FragmentTransaction ftrans;
-    private SharedPreferences mShp;
+    protected JsonClasses.MainJson RnR;
+    protected List<JsonClasses.Recipe> recipes;
+    protected List<JsonClasses.Restaurant> restaurants;
+    protected StorageReference mStorageRef;
+    protected FragmentTransaction ftrans;
+    protected SharedPreferences mShp;
+    protected RecipesFragment recipesFragment;
 
     final long ONE_MEGABYTE = 1024 * 1024;
-    final String APP_PREFERENCES = "settings";
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -45,12 +48,14 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     ftrans = getFragmentManager().beginTransaction();
-                    ftrans.replace(R.id.fragment_container, new RecipesFragment());
+                    recipesFragment = RecipesFragment.newInstance(1, false);
+                    ftrans.replace(R.id.fragment_container, recipesFragment);
                     ftrans.commit();
                     return true;
                 case R.id.navigation_dashboard:
                     ftrans = getFragmentManager().beginTransaction();
-                    ftrans.replace(R.id.fragment_container, new FavouriteRecipesFragment());
+                    recipesFragment = RecipesFragment.newInstance(1, true);
+                    ftrans.replace(R.id.fragment_container, recipesFragment);
                     ftrans.commit();
                     return true;
                 case R.id.navigation_notifications:
@@ -74,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         mShp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
     }
 
-    void getInfoFromFirebase(final StorageReference targetRef){
+    void getInfoFromFirebase(final StorageReference targetRef) {
 
         targetRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
@@ -101,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
 
             StringBuilder sb = new StringBuilder();
             String s;
-            while((s= br.readLine())!= null)  {
+            while ((s = br.readLine()) != null) {
                 sb.append(s).append("\n");
             }
             RnR = gson.fromJson(sb.toString(), JsonClasses.MainJson.class);
@@ -109,6 +114,35 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                 recipes = RnR.getRecipes();
                 restaurants = RnR.getRestaurants();
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void putInfoIntoFirebase(final StorageReference targetRef) {
+
+        Gson gson = new Gson();
+        String r_n_r = gson.toJson(RnR);
+        byte[] bytes = r_n_r.getBytes();
+
+        targetRef.putBytes(bytes).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot snapshot) {
+
+            }
+        });
+
+
+        try {
+            FileOutputStream fout = openFileOutput(targetRef.getName(), MODE_PRIVATE);
+            fout.write(bytes);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -131,7 +165,10 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
 
     @Override
     public void onLikeFragmentInteraction(JsonClasses.Recipe item) {
-
+        StorageReference baseInfoRef = mStorageRef.child("recipes.json");
+        getInfoFromFirebase(baseInfoRef);
+        RnR.getRecipes().set(item.getId(), item);
+        putInfoIntoFirebase(baseInfoRef);
     }
 
     public List<JsonClasses.Recipe> getRecipes() {

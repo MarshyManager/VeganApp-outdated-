@@ -64,9 +64,11 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
                     if (!mShp.getBoolean("recipe_like_" + holder.mItem.getId(), false)) {
                         Picasso.with(view.getContext()).load(R.mipmap.like_activ).into(holder.mDishRating);
                         holder.mRateNum.setText((++rate).toString());
+                        holder.mItem.setRate(rate);
                     } else {
                         Picasso.with(view.getContext()).load(R.mipmap.like).into(holder.mDishRating);
                         holder.mRateNum.setText((--rate).toString());
+                        holder.mItem.setRate(rate);
                     }
 
                     String s = "recipe_like_" + holder.mItem.getId();
@@ -76,6 +78,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
                     else
                         editor.putBoolean(s, false);
                     editor.apply();
+                    mLikeListener.onLikeFragmentInteraction(holder.mItem);
                 }
             }
         });

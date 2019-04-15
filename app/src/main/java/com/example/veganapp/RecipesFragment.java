@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,13 +25,16 @@ public class RecipesFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     protected static final String ARG_COLUMN_COUNT = "column-count";
+    protected static final String ARG_FILTER = "filter";
     // TODO: Customize parameters
     protected int mColumnCount = 1;
     protected OnListFragmentInteractionListener mListener;
     protected OnLikeFragmentInteractionListener mLikeListener;
     protected List<JsonClasses.Recipe> recipes;
+    protected List<JsonClasses.Recipe> favRecipes;
     protected SharedPreferences mShp;
     protected MainActivity mParentRef;
+    protected boolean filter;
 
 
     /**
@@ -42,9 +46,10 @@ public class RecipesFragment extends Fragment {
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static RecipesFragment newInstance(int columnCount) {
+    public static RecipesFragment newInstance(int columnCount, boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
+        args.putBoolean(ARG_FILTER, filter);
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
@@ -55,6 +60,7 @@ public class RecipesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+            filter = getArguments().getBoolean(ARG_FILTER);
         }
     }
 
@@ -63,9 +69,19 @@ public class RecipesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
-        mParentRef = (MainActivity)getActivity();
+        mParentRef = (MainActivity) getActivity();
         recipes = mParentRef.getRecipes();
         mShp = mParentRef.getShp();
+
+        favRecipes = new ArrayList<>();
+        favRecipes.addAll(recipes);
+        if (filter) {
+            for (int i = 0; i < favRecipes.size(); i++) {
+                if (!mShp.getBoolean("recipe_like_" + favRecipes.get(i).getId(), false))
+                    favRecipes.remove(i--);
+            }
+        }
+
 
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -75,7 +91,7 @@ public class RecipesFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyRecipeRecyclerViewAdapter(recipes, mShp, mListener, mLikeListener));
+            recyclerView.setAdapter(new MyRecipeRecyclerViewAdapter(favRecipes, mShp, mListener, mLikeListener));
         }
         return view;
     }
@@ -98,6 +114,7 @@ public class RecipesFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
