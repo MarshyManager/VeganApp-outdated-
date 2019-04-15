@@ -15,12 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
- */
 public class RecipesFragment extends Fragment {
 
     // TODO: Customize parameter argument names
@@ -28,12 +22,11 @@ public class RecipesFragment extends Fragment {
     protected static final String ARG_FILTER = "filter";
     // TODO: Customize parameters
     protected int mColumnCount = 1;
-    protected OnListFragmentInteractionListener mListener;
-    protected OnLikeFragmentInteractionListener mLikeListener;
+    protected SupportInterfaces.OnRecipeListFragmentInteractionListener mListener;
+    protected SupportInterfaces.OnRecipeLikeFragmentInteractionListener mLikeListener;
     protected List<JsonClasses.Recipe> recipes;
     protected List<JsonClasses.Recipe> favRecipes;
-    protected SharedPreferences mShp;
-    protected MainActivity mParentRef;
+    protected SharedPreferences shp;
     protected boolean filter;
 
 
@@ -46,9 +39,11 @@ public class RecipesFragment extends Fragment {
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static RecipesFragment newInstance(int columnCount, boolean filter) {
+    public static RecipesFragment newInstance(SharedPreferences shp, List<JsonClasses.Recipe> recipes, int columnCount, boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
+        fragment.shp = shp;
+        fragment.recipes = recipes;
         args.putBoolean(ARG_FILTER, filter);
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -69,15 +64,11 @@ public class RecipesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
-        mParentRef = (MainActivity) getActivity();
-        recipes = mParentRef.getRecipes();
-        mShp = mParentRef.getShp();
-
         favRecipes = new ArrayList<>();
         favRecipes.addAll(recipes);
         if (filter) {
             for (int i = 0; i < favRecipes.size(); i++) {
-                if (!mShp.getBoolean("recipe_like_" + favRecipes.get(i).getId(), false))
+                if (!shp.getBoolean("recipe_like_" + favRecipes.get(i).getId(), false))
                     favRecipes.remove(i--);
             }
         }
@@ -91,7 +82,7 @@ public class RecipesFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyRecipeRecyclerViewAdapter(favRecipes, mShp, mListener, mLikeListener));
+            recyclerView.setAdapter(new MyRecipeRecyclerViewAdapter(favRecipes, shp, mListener, mLikeListener));
         }
         return view;
     }
@@ -100,9 +91,9 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-            mLikeListener = (OnLikeFragmentInteractionListener) context;
+        if (context instanceof SupportInterfaces.OnRecipeLikeFragmentInteractionListener) {
+            mListener = (SupportInterfaces.OnRecipeListFragmentInteractionListener) context;
+            mLikeListener = (SupportInterfaces.OnRecipeLikeFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -113,25 +104,5 @@ public class RecipesFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(JsonClasses.Recipe item);
-    }
-
-    public interface OnLikeFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onLikeFragmentInteraction(JsonClasses.Recipe item);
     }
 }

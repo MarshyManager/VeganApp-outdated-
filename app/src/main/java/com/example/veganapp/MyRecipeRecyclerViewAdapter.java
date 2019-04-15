@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-
-import com.example.veganapp.RecipesFragment.OnListFragmentInteractionListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.Collection;
@@ -21,18 +19,18 @@ import java.util.List;
 public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRecyclerViewAdapter.ViewHolder> {
 
     private final List<JsonClasses.Recipe> recipes;
-    private final OnListFragmentInteractionListener mListener;
-    private RecipesFragment.OnLikeFragmentInteractionListener mLikeListener;
-    private SharedPreferences mShp;
+    private final SupportInterfaces.OnRecipeListFragmentInteractionListener mListener;
+    private final SupportInterfaces.OnRecipeLikeFragmentInteractionListener mLikeListener;
+    private SharedPreferences shp;
 
 
     public MyRecipeRecyclerViewAdapter(List<JsonClasses.Recipe> items, SharedPreferences shp,
-                                       OnListFragmentInteractionListener listener,
-                                       RecipesFragment.OnLikeFragmentInteractionListener likeListener) {
+                                       SupportInterfaces.OnRecipeListFragmentInteractionListener listener,
+                                       SupportInterfaces.OnRecipeLikeFragmentInteractionListener likeListener) {
         recipes = items;
         mListener = listener;
         mLikeListener = likeListener;
-        mShp = shp;
+        this.shp = shp;
     }
 
     public void setItems(Collection<JsonClasses.Recipe> tweets) {
@@ -61,24 +59,15 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             public void onClick(View view) {
                 if (null != mLikeListener) {
                     Integer rate = Integer.parseInt(holder.mRateNum.getText().toString());
-                    if (!mShp.getBoolean("recipe_like_" + holder.mItem.getId(), false)) {
+                    if (!shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
                         Picasso.with(view.getContext()).load(R.mipmap.like_activ).into(holder.mDishRating);
-                        holder.mRateNum.setText((++rate).toString());
-                        holder.mItem.setRate(rate);
+                        holder.mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(++rate));
                     } else {
                         Picasso.with(view.getContext()).load(R.mipmap.like).into(holder.mDishRating);
-                        holder.mRateNum.setText((--rate).toString());
-                        holder.mItem.setRate(rate);
+                        holder.mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(--rate));
                     }
-
-                    String s = "recipe_like_" + holder.mItem.getId();
-                    SharedPreferences.Editor editor = mShp.edit();
-                    if (!mShp.getBoolean(s, false))
-                        editor.putBoolean(s, true);
-                    else
-                        editor.putBoolean(s, false);
-                    editor.apply();
-                    mLikeListener.onLikeFragmentInteraction(holder.mItem);
+                    holder.recipe.setRate(rate);
+                    mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
                 }
             }
         });
@@ -86,7 +75,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onRecipeListFragmentInteraction(holder.recipe);
                 }
             }
         });
@@ -98,37 +87,37 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mNameView;
-        public final TextView mViewsNum;
-        public final ImageView mViewsImage;
-        public final ImageView mDishImage;
-        public final RatingBar mDishComplexity;
-        public final TextView mRateNum;
-        public final ImageView mDishRating;
+        final View mView;
+        final TextView mNameView;
+        final TextView mViewsNum;
+        final ImageView mViewsImage;
+        final ImageView mDishImage;
+        final RatingBar mDishComplexity;
+        final TextView mRateNum;
+        final ImageView mDishRating;
 
-        public JsonClasses.Recipe mItem;
+        JsonClasses.Recipe recipe;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             mNameView = view.findViewById(R.id.dish_name);
-            mViewsNum = view.findViewById(R.id.views_num);
+            mViewsNum = view.findViewById(R.id.dish_views_num);
             mDishImage = view.findViewById(R.id.dish_image);
-            mViewsImage = view.findViewById(R.id.views_image);
-            mDishComplexity = view.findViewById(R.id.complexity);
-            mRateNum = view.findViewById(R.id.rate_num);
+            mViewsImage = view.findViewById(R.id.dish_views_image);
+            mDishComplexity = view.findViewById(R.id.dish_complexity);
+            mRateNum = view.findViewById(R.id.dish_rate_num);
             mDishRating = view.findViewById(R.id.dish_rating);
         }
 
-        public void bind(JsonClasses.Recipe recipe) {
-            mItem = recipe;
+        void bind(JsonClasses.Recipe recipe) {
+            this.recipe = recipe;
             mNameView.setText(recipe.getName());
-            mViewsNum.setText(recipe.getViews().toString());
             mDishComplexity.setRating(recipe.getComplexity().floatValue());
-            mRateNum.setText(recipe.getRate().toString());
+            mViewsNum.setText(SupportClasses.StringFormer.formStringValueFromInt(recipe.getViews()));
+            mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(recipe.getRate()));
 
-            if (!mShp.getBoolean("recipe_like_" + recipe.getId(), false))
+            if (!shp.getBoolean("recipe_like_" + recipe.getId(), false))
                 Picasso.with(mView.getContext()).load(R.mipmap.like).into(mDishRating);
             else
                 Picasso.with(mView.getContext()).load(R.mipmap.like_activ).into(mDishRating);

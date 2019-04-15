@@ -11,39 +11,36 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="match_parent" >
 
         <TextView
             android:id="@+id/dish_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="@string/app_name"
-            android:textColor="#FF000000"
             android:textSize="20sp"
-            android:maxLength="40"/>
+            android:textColor="@color/black"
+            android:maxLength="40"
+            android:layout_marginStart="10dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/complexity"
             android:text="@string/complexity"
-            android:textColor="#FF000000"
             android:textSize="15sp"
+            android:textColor="@color/black"
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/dish_complexity"
             android:layout_marginStart="10dp"
-            android:layout_marginBottom="5dp"
-            android:layout_alignParentStart="true" />
+            android:layout_marginBottom="5dp" />
 
         <RatingBar
-            android:id="@+id/complexity"
+            android:id="@+id/dish_complexity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="10dp"
-            style="?android:attr/ratingBarStyleSmall"
             android:layout_marginBottom="10dp"
-            android:stepSize="0.1" />
+            style="@style/ListRate" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -52,44 +49,44 @@
             android:layout_alignParentBottom="true">
 
             <TextView
-                android:id="@+id/rate_num"
+                android:id="@+id/dish_rate_num"
                 android:layout_width="40dp"
                 android:layout_height="30dp"
-                android:layout_above="@+id/views_num"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textAlignment="center"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="5dp"
-                android:text="100"
-                android:textColor="#FF000000"
-                android:textSize="20sp" />
+                android:layout_above="@+id/dish_views_num"
+                android:layout_marginEnd="5dp" />
 
             <ImageView
                 android:id="@+id/dish_rating"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_above="@+id/views_image"
-                android:layout_marginEnd="5dp"
-                android:layout_toStartOf="@+id/views_num"
-                android:src="@mipmap/like" />
+                android:src="@mipmap/like"
+                android:layout_toStartOf="@+id/dish_views_num"
+                android:layout_above="@+id/dish_views_image"
+                android:layout_marginEnd="5dp" />
 
             <TextView
-                android:id="@+id/views_num"
+                android:id="@+id/dish_views_num"
                 android:layout_width="40dp"
                 android:layout_height="30dp"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:textAlignment="center"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginEnd="5dp"
-                android:text="100"
-                android:textColor="#FF000000"
-                android:textSize="20sp" />
+                android:layout_marginEnd="5dp" />
 
             <ImageView
-                android:id="@+id/views_image"
+                android:id="@+id/dish_views_image"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:background="@mipmap/eye"
                 android:layout_alignParentBottom="true"
-                android:layout_marginEnd="5dp"
-                android:layout_toStartOf="@+id/views_num"
-                android:background="@mipmap/eye" />
+                android:layout_toStartOf="@+id/dish_views_num"
+                android:layout_marginEnd="5dp" />
 
         </RelativeLayout>
 
