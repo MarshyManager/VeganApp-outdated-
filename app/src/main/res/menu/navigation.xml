@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_recipe_list"
         android:icon="@mipmap/cook_book"
         android:title="@string/title_cook_book"/>
 
     <item
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/navigation_favourite"
         android:icon="@mipmap/favourite_recipes"
         android:title="@string/title_fav_recipes"/>
 

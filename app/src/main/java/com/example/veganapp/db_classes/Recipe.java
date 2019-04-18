@@ -1,4 +1,4 @@
-package com.example.veganapp;
+package com.example.veganapp.db_classes;
 
 import java.util.List;
 

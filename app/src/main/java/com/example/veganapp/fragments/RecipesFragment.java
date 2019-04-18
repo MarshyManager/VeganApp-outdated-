@@ -1,4 +1,4 @@
-package com.example.veganapp;
+package com.example.veganapp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.veganapp.MyRecipeRecyclerViewAdapter;
+import com.example.veganapp.R;
+import com.example.veganapp.db_classes.Recipe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +26,10 @@ public class RecipesFragment extends Fragment {
     protected static final String ARG_FILTER = "filter";
     // TODO: Customize parameters
     protected int mColumnCount = 1;
-    protected SupportInterfaces.OnRecipeListFragmentInteractionListener mListener;
-    protected SupportInterfaces.OnRecipeLikeFragmentInteractionListener mLikeListener;
-    protected List<JsonClasses.Recipe> recipes;
-    protected List<JsonClasses.Recipe> favRecipes;
+    protected OnRecipeListFragmentInteractionListener mListener;
+    protected OnRecipeLikeFragmentInteractionListener mLikeListener;
+    protected List<Recipe> recipes;
+    protected List<Recipe> favRecipes;
     protected SharedPreferences shp;
     protected boolean filter;
 
@@ -39,7 +43,7 @@ public class RecipesFragment extends Fragment {
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static RecipesFragment newInstance(SharedPreferences shp, List<JsonClasses.Recipe> recipes, int columnCount, boolean filter) {
+    public static RecipesFragment newInstance(SharedPreferences shp, List<Recipe> recipes, int columnCount, boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
         fragment.shp = shp;
@@ -91,9 +95,9 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof SupportInterfaces.OnRecipeLikeFragmentInteractionListener) {
-            mListener = (SupportInterfaces.OnRecipeListFragmentInteractionListener) context;
-            mLikeListener = (SupportInterfaces.OnRecipeLikeFragmentInteractionListener) context;
+        if (context instanceof OnRecipeLikeFragmentInteractionListener) {
+            mListener = (OnRecipeListFragmentInteractionListener) context;
+            mLikeListener = (OnRecipeLikeFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -104,5 +108,13 @@ public class RecipesFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public interface OnRecipeListFragmentInteractionListener {
+        void onRecipeListFragmentInteraction(Recipe item);
+    }
+
+    public interface OnRecipeLikeFragmentInteractionListener {
+        void onRecipeLikeFragmentInteraction(Recipe item);
     }
 }

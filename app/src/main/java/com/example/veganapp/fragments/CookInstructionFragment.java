@@ -1,4 +1,4 @@
-package com.example.veganapp;
+package com.example.veganapp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,11 +11,14 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.example.veganapp.R;
+import com.example.veganapp.db_classes.Recipe;
+import com.example.veganapp.support_classes.StringFormatter;
 import com.squareup.picasso.Picasso;
 
 public class CookInstructionFragment extends Fragment {
 
-    protected JsonClasses.Recipe recipe;
+    protected Recipe recipe;
     protected TextView mNameView;
     protected TextView mRateNum;
     protected TextView mViewsNum;
@@ -26,13 +29,13 @@ public class CookInstructionFragment extends Fragment {
     protected ImageView mDishImage;
     protected ImageView mRateImage;
     protected SharedPreferences shp;
-    protected SupportInterfaces.OnRecipeLikeFragmentInteractionListener mLikeListener;
+    protected RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
 
 
     public CookInstructionFragment() {
     }
 
-    public static CookInstructionFragment newInstance(JsonClasses.Recipe recipe, SharedPreferences shp) {
+    public static CookInstructionFragment newInstance(Recipe recipe, SharedPreferences shp) {
         CookInstructionFragment fragment = new CookInstructionFragment();
 
         Bundle args = new Bundle();
@@ -64,9 +67,9 @@ public class CookInstructionFragment extends Fragment {
         mNameView.setText(recipe.getName());
         mIngestionText.setText(recipe.getIngestion());
         mComplexity.setRating(recipe.getComplexity().floatValue());
-        mViewsNum.setText(SupportClasses.StringFormer.formStringValueFromInt(recipe.getViews()));
-        mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(recipe.getRate()));
-        mIngredientsText.setText(SupportClasses.StringFormer.formIngredientsList(recipe));
+        mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
+        mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
+        mIngredientsText.setText(StringFormatter.formIngredientsList(recipe));
         mRecipeText.setText(recipe.getDetail());
 
         if (!shp.getBoolean("recipe_like_" + recipe.getId(), false))
@@ -87,10 +90,10 @@ public class CookInstructionFragment extends Fragment {
                     Integer rate = Integer.parseInt(mRateNum.getText().toString());
                     if (!shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
                         Picasso.with(view.getContext()).load(R.mipmap.like_activ).into(mRateImage);
-                        mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(++rate));
+                        mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
                     } else {
                         Picasso.with(view.getContext()).load(R.mipmap.like).into(mRateImage);
-                        mRateNum.setText(SupportClasses.StringFormer.formStringValueFromInt(--rate));
+                        mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
                     }
                     recipe.setRate(rate);
                     mLikeListener.onRecipeLikeFragmentInteraction(recipe);
@@ -104,8 +107,8 @@ public class CookInstructionFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof SupportInterfaces.OnRecipeLikeFragmentInteractionListener) {
-            mLikeListener = (SupportInterfaces.OnRecipeLikeFragmentInteractionListener) context;
+        if (context instanceof RecipesFragment.OnRecipeLikeFragmentInteractionListener) {
+            mLikeListener = (RecipesFragment.OnRecipeLikeFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
