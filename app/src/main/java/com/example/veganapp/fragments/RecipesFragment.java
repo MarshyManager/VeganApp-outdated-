@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.veganapp.MyRecipeRecyclerViewAdapter;
+import com.example.veganapp.custom_adapters.MyRecipeRecyclerViewAdapter;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 
@@ -21,10 +21,9 @@ import java.util.List;
 
 public class RecipesFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     protected static final String ARG_COLUMN_COUNT = "column-count";
     protected static final String ARG_FILTER = "filter";
-    // TODO: Customize parameters
+
     protected int mColumnCount = 1;
     protected OnRecipeListFragmentInteractionListener mListener;
     protected OnRecipeLikeFragmentInteractionListener mLikeListener;
@@ -33,11 +32,6 @@ public class RecipesFragment extends Fragment {
     protected SharedPreferences shp;
     protected boolean filter;
 
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public RecipesFragment() {
     }
 

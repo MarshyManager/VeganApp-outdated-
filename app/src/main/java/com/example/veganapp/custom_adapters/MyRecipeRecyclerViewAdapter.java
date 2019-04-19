@@ -1,4 +1,4 @@
-package com.example.veganapp;
+package com.example.veganapp.custom_adapters;
 
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.example.veganapp.support_classes.StringFormatter;

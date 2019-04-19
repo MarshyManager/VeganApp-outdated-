@@ -3,6 +3,7 @@ package com.example.veganapp.activities;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,18 +17,20 @@ import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.db_classes.Restaurant;
 
 import com.example.veganapp.fragments.CookInstructionFragment;
+import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.yandex.mapkit.MapKitFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements RecipesFragment.OnRecipeListFragmentInteractionListener,
-        RecipesFragment.OnRecipeLikeFragmentInteractionListener {
+        RecipesFragment.OnRecipeLikeFragmentInteractionListener, MapFragment.OnFragmentInteractionListener {
 
     static final String APP_PREFERENCES = "settings";
     static final String RECIPES = "recipes";
@@ -39,8 +42,6 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     protected FragmentTransaction ftrans;
     protected SharedPreferences shp;
 
-    protected CustomValueEventListener recipesListener;
-    protected CustomValueEventListener restaurantsListener;
 
 
     enum ListType {
@@ -57,13 +58,16 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             switch (item.getItemId()) {
                 case R.id.navigation_recipe_list:
                     recipesFragment = RecipesFragment.newInstance(shp, recipes, 1, false);
-                    recipesListener.new ChangeFragment(recipesFragment).execute();
+                    new ChangeFragment(recipesFragment).execute(RECIPES);
                     return true;
                 case R.id.navigation_favourite:
                     recipesFragment = RecipesFragment.newInstance(shp, recipes, 1, true);
-                    recipesListener.new ChangeFragment(recipesFragment).execute();
+                    new ChangeFragment(recipesFragment).execute(RECIPES);
                     return true;
-                case R.id.navigation_notifications:
+                case R.id.navigation_map:
+                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
+                    ftrans = getFragmentManager().beginTransaction();
+                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
                     return true;
             }
             return false;
@@ -75,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        MapKitFactory.setApiKey("e85d69c5-1f52-4e55-863a-418618587a97");
+        MapKitFactory.initialize(this);
+
         shp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
 
         mDB = FirebaseDatabase.getInstance();
@@ -84,13 +91,23 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         recipes = new ArrayList<>();
         restaurants = new ArrayList<>();
 
-        recipesListener = new CustomValueEventListener(ListType.RECIPES);
-        restaurantsListener = new CustomValueEventListener(ListType.RESTAURANTS);
-        DBRecipes.addValueEventListener(recipesListener);
-        DBRestaurants.addValueEventListener(restaurantsListener);
+        DBRecipes.addValueEventListener(new CustomValueEventListener(ListType.RECIPES));
+        DBRestaurants.addValueEventListener(new CustomValueEventListener(ListType.RESTAURANTS));
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MapKitFactory.getInstance().onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        MapKitFactory.getInstance().onStop();
     }
 
     @Override
@@ -111,6 +128,12 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         else
             editor.putBoolean(s, false);
         editor.apply();
+    }
+
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
 
@@ -149,32 +172,33 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         public void onCancelled(@NonNull DatabaseError databaseError) {
             Log.d("Error", "Failed to read value.");
         }
+    }
 
-        class ChangeFragment extends AsyncTask<Void, Void, Void> {
-            Fragment fragment;
 
-            ChangeFragment(Fragment fragment) {
-                this.fragment = fragment;
+    class ChangeFragment extends AsyncTask<String, Void, Void> {
+        Fragment fragment;
+
+        ChangeFragment(Fragment fragment) {
+            this.fragment = fragment;
+        }
+
+        @Override
+        protected Void doInBackground(String... srtings) {
+            switch (srtings[0]) {
+                case RECIPES:
+                    while (recipes.isEmpty()) ;
+                case RESTAURANTS:
+                    while (restaurants.isEmpty()) ;
+                default:
+                    break;
             }
+            return null;
+        }
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                switch (listType) {
-                    case RECIPES:
-                        while (recipes.isEmpty()) ;
-                    case RESTAURANTS:
-                        while (restaurants.isEmpty()) ;
-                    default:
-                        break;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                ftrans = getFragmentManager().beginTransaction();
-                ftrans.replace(R.id.fragment_container, fragment).commit();
-            }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            ftrans = getFragmentManager().beginTransaction();
+            ftrans.replace(R.id.fragment_container, fragment).commit();
         }
     }
 
