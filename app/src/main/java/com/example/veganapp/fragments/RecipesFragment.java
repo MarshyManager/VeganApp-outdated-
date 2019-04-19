@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import com.example.veganapp.custom_adapters.MyRecipeRecyclerViewAdapter;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
+import com.google.firebase.FirebaseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,9 @@ public class RecipesFragment extends Fragment {
 
     protected static final String ARG_COLUMN_COUNT = "column-count";
     protected static final String ARG_FILTER = "filter";
+    static final String SHARED_PREFERENCES = "shared_preferences";
+    final String RECIPES = "recipes";
+
 
     protected int mColumnCount = 1;
     protected OnRecipeListFragmentInteractionListener mListener;
@@ -35,15 +39,13 @@ public class RecipesFragment extends Fragment {
     public RecipesFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static RecipesFragment newInstance(SharedPreferences shp, List<Recipe> recipes, int columnCount, boolean filter) {
+    public static RecipesFragment newInstance(String sharedPreferences, List<Recipe> recipes, int columnCount, boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
-        fragment.shp = shp;
         fragment.recipes = recipes;
         args.putBoolean(ARG_FILTER, filter);
         args.putInt(ARG_COLUMN_COUNT, columnCount);
+        args.putString(SHARED_PREFERENCES, sharedPreferences);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,6 +57,13 @@ public class RecipesFragment extends Fragment {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             filter = getArguments().getBoolean(ARG_FILTER);
         }
+        if (savedInstanceState != null) {
+            recipes = (ArrayList<Recipe>) savedInstanceState.getSerializable(RECIPES);
+            shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
+            mColumnCount = savedInstanceState.getInt(ARG_COLUMN_COUNT);
+            filter = savedInstanceState.getBoolean(ARG_FILTER);
+        }
+        shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
     }
 
     @Override
@@ -99,6 +108,15 @@ public class RecipesFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(RECIPES, (ArrayList)recipes);
+        outState.putInt(ARG_COLUMN_COUNT, getArguments().getInt(ARG_COLUMN_COUNT));
+        outState.putBoolean(ARG_FILTER, filter);
+        outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -109,6 +127,6 @@ public class RecipesFragment extends Fragment {
     }
 
     public interface OnRecipeLikeFragmentInteractionListener {
-        void onRecipeLikeFragmentInteraction(Recipe item);
+        void onRecipeLikeFragmentInteraction(Recipe item) throws FirebaseException;
     }
 }

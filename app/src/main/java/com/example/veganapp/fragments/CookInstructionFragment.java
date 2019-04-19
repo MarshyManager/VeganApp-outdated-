@@ -4,19 +4,26 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.veganapp.R;
+import com.example.veganapp.activities.MainActivity;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.support_classes.StringFormatter;
+import com.google.firebase.FirebaseException;
 import com.squareup.picasso.Picasso;
 
 public class CookInstructionFragment extends Fragment {
+
+    final String RECIPE = "recipe";
+    static final String SHARED_PREFERENCES = "shared_preferences";
 
     protected Recipe recipe;
     protected TextView mNameView;
@@ -35,12 +42,12 @@ public class CookInstructionFragment extends Fragment {
     public CookInstructionFragment() {
     }
 
-    public static CookInstructionFragment newInstance(Recipe recipe, SharedPreferences shp) {
+    public static CookInstructionFragment newInstance(Recipe recipe, String sharedPreferences) {
         CookInstructionFragment fragment = new CookInstructionFragment();
 
         Bundle args = new Bundle();
         fragment.recipe = recipe;
-        fragment.shp = shp;
+        args.putString(SHARED_PREFERENCES, sharedPreferences);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,7 +55,13 @@ public class CookInstructionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            recipe = (Recipe) savedInstanceState.getSerializable(RECIPE);
+            shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
+        }
+        shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,9 +86,9 @@ public class CookInstructionFragment extends Fragment {
         mRecipeText.setText(recipe.getDetail());
 
         if (!shp.getBoolean("recipe_like_" + recipe.getId(), false))
-            Picasso.with(v.getContext()).load(R.mipmap.like).into(mRateImage);
+            Picasso.with(v.getContext()).load(R.drawable.like).into(mRateImage);
         else
-            Picasso.with(v.getContext()).load(R.mipmap.like_activ).into(mRateImage);
+            Picasso.with(v.getContext()).load(R.drawable.like_activ).into(mRateImage);
 
         String dishPhotoUrl = recipe.getUrlString();
 
@@ -87,21 +100,32 @@ public class CookInstructionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                    Integer rate = Integer.parseInt(mRateNum.getText().toString());
-                    if (!shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
-                        Picasso.with(view.getContext()).load(R.mipmap.like_activ).into(mRateImage);
-                        mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
-                    } else {
-                        Picasso.with(view.getContext()).load(R.mipmap.like).into(mRateImage);
-                        mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                    try {
+                        mLikeListener.onRecipeLikeFragmentInteraction(recipe);
+                        Integer rate = Integer.parseInt(mRateNum.getText().toString());
+                        if (!shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
+                            Picasso.with(view.getContext()).load(R.drawable.like_activ).into(mRateImage);
+                            mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
+                        } else {
+                            Picasso.with(view.getContext()).load(R.drawable.like).into(mRateImage);
+                            mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                        }
+                        recipe.setRate(rate);
+                    } catch (FirebaseException e) {
+                        Toast.makeText(getActivity(), "Error occurred! Connection problem!", Toast.LENGTH_SHORT).show();
                     }
-                    recipe.setRate(rate);
-                    mLikeListener.onRecipeLikeFragmentInteraction(recipe);
                 }
             }
         });
 
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(RECIPE, recipe);
+        outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -113,6 +137,11 @@ public class CookInstructionFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override

@@ -63,7 +63,7 @@
                 android:id="@+id/dish_rating"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:src="@mipmap/like"
+                android:src="@drawable/like"
                 android:layout_toStartOf="@+id/dish_views_num"
                 android:layout_above="@+id/dish_views_image"
                 android:layout_marginEnd="5dp" />
@@ -83,7 +83,7 @@
                 android:id="@+id/dish_views_image"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@mipmap/eye"
+                android:background="@drawable/eye"
                 android:layout_alignParentBottom="true"
                 android:layout_toStartOf="@+id/dish_views_num"
                 android:layout_marginEnd="5dp" />

@@ -1,8 +1,9 @@
 package com.example.veganapp.db_classes;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Recipe {
+public class Recipe implements Serializable {
 
     private Integer Id;
     private Double complexity;

@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/navigation_recipe_list"
-        android:icon="@mipmap/cook_book"
+        android:icon="@drawable/cook_book"
         android:title="@string/title_cook_book"/>
 
     <item
         android:id="@+id/navigation_favourite"
-        android:icon="@mipmap/favourite_recipes"
+        android:icon="@drawable/favourite_recipes"
         android:title="@string/title_fav_recipes"/>
 
     <item

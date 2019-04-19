@@ -1,6 +1,8 @@
 package com.example.veganapp.db_classes;
 
-public class Ingredient {
+import java.io.Serializable;
+
+public class Ingredient implements Serializable {
 
     private String amount;
     private String name;

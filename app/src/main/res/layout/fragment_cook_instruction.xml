@@ -13,8 +13,9 @@
             android:id="@+id/instr_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
-            android:layout_alignParentTop="true" />
+            android:scaleType="centerInside"
+            android:layout_alignParentTop="true"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/instr_name"
@@ -68,10 +69,11 @@
             android:id="@+id/instr_rate"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@mipmap/like"
+            android:src="@drawable/like"
             android:scaleType="fitCenter"
             android:layout_toStartOf="@id/instr_rate_num"
-            android:layout_below="@id/instr_ingestion" />
+            android:layout_below="@id/instr_ingestion"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/instr_views_num"
@@ -87,10 +89,11 @@
             android:id="@+id/instr_views"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@mipmap/eye"
+            android:src="@drawable/eye"
             android:scaleType="fitCenter"
             android:layout_toStartOf="@id/instr_views_num"
-            android:layout_below="@id/instr_rate" />
+            android:layout_below="@id/instr_rate"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/instr_ingr_title"

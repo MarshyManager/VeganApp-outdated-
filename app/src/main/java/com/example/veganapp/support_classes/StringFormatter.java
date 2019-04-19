@@ -5,15 +5,15 @@ import com.example.veganapp.db_classes.Recipe;
 
 public class StringFormatter {
 
-    static final int ONE_THOUSAND = 1000;
-    static final int ONE_MILLION = 1000000;
+    private static final int ONE_THOUSAND = 1000;
+    private static final int ONE_MILLION = 1000000;
 
     public static String formStringValueFromInt(int value) {
         if (value < ONE_THOUSAND)
-            return Integer.toString(value);
+            return String.valueOf(value);
         if (value < ONE_MILLION)
-            return Integer.toString(value / ONE_THOUSAND) + "K";
-        return Integer.toString(value / ONE_MILLION) + "M";
+            return String.valueOf(value / ONE_THOUSAND) + "K";
+        return String.valueOf(value / ONE_MILLION) + "M";
     }
 
     public static String formIngredientsList(Recipe recipe) {

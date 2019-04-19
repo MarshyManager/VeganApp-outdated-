@@ -1,18 +1,22 @@
 package com.example.veganapp.custom_adapters;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.example.veganapp.support_classes.StringFormatter;
+import com.google.firebase.FirebaseException;
 import com.squareup.picasso.Picasso;
 
 import java.util.Collection;
@@ -63,16 +67,20 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                    Integer rate = holder.recipe.getRate();
-                    if (!shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
-                        Picasso.with(view.getContext()).load(R.mipmap.like_activ).into(holder.mDishRating);
-                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
-                    } else {
-                        Picasso.with(view.getContext()).load(R.mipmap.like).into(holder.mDishRating);
-                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                    try {
+                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
+                        Integer rate = holder.recipe.getRate();
+                        if (!shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
+                            Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
+                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
+                        } else {
+                            Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
+                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                        }
+                        holder.recipe.setRate(rate);
+                    } catch (FirebaseException e) {
+                        Toast.makeText(view.getContext(), "Error occurred! Connection problem!", Toast.LENGTH_SHORT).show();
                     }
-                    holder.recipe.setRate(rate);
-                    mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
                 }
             }
         });
@@ -126,9 +134,9 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
 
             if (!shp.getBoolean("recipe_like_" + recipe.getId(), false))
-                Picasso.with(mView.getContext()).load(R.mipmap.like).into(mDishRating);
+                Picasso.with(mView.getContext()).load(R.drawable.like).into(mDishRating);
             else
-                Picasso.with(mView.getContext()).load(R.mipmap.like_activ).into(mDishRating);
+                Picasso.with(mView.getContext()).load(R.drawable.like_activ).into(mDishRating);
 
             String dishPhotoUrl = recipe.getUrlString();
 
