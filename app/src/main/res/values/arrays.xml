@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sort_params">
+        <item>Default</item>
+        <item>Likes</item>
+        <item>Likes</item>
+        <item>Views</item>
+        <item>Views</item>
+        <item>Complexity</item>
+        <item>Complexity</item>
+    </string-array>
+</resources>

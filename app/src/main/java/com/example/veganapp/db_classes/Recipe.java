@@ -3,6 +3,8 @@ package com.example.veganapp.db_classes;
 import java.io.Serializable;
 import java.util.List;
 
+import androidx.annotation.Nullable;
+
 public class Recipe implements Serializable {
 
     private Integer Id;
@@ -31,6 +33,13 @@ public class Recipe implements Serializable {
         this.views = views;
         this.type = type;
         this.complexity = complexity;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Recipe)
+            return getId().equals(((Recipe) obj).getId());
+        return false;
     }
 
     public Integer getId() {

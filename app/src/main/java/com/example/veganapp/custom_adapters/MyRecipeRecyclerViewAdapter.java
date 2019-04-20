@@ -2,7 +2,10 @@ package com.example.veganapp.custom_adapters;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +20,14 @@ import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.example.veganapp.support_classes.StringFormatter;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -33,24 +41,102 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     private SharedPreferences shp;
 
 
-    public MyRecipeRecyclerViewAdapter(List<Recipe> items, SharedPreferences shp,
+    public MyRecipeRecyclerViewAdapter(SharedPreferences shp,
                                        RecipesFragment.OnRecipeListFragmentInteractionListener listener,
                                        RecipesFragment.OnRecipeLikeFragmentInteractionListener likeListener) {
-        recipes = items;
         mListener = listener;
         mLikeListener = likeListener;
         this.shp = shp;
+        recipes = new ArrayList<>();
     }
 
-    public void setItems(Collection<Recipe> recipes) {
-        recipes.addAll(recipes);
-        notifyDataSetChanged();
+
+    public void addOrChange(Recipe recipe, int position) {
+        if (!recipes.contains(recipe)) {
+            recipes.add(recipe);
+            notifyItemInserted(position);
+        } else {
+            int index = recipes.indexOf(recipe);
+            recipes.set(index, recipe);
+            notifyItemChanged(index);
+        }
     }
 
-    public void clearItems() {
+    public void remove(int position) {
+        recipes.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void sort(int i){
+        ArrayList<Recipe> temp = new ArrayList<>(recipes);
+        switch (i)
+        {
+            case 0:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return lhv.getId() - rhv.getId();
+                    }
+                });
+                break;
+            case 1:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return lhv.getRate() - rhv.getRate();
+                    }
+                });
+                break;
+            case 2:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return rhv.getRate() - lhv.getRate();
+                    }
+                });
+                break;
+            case 3:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return lhv.getViews() - rhv.getViews();
+                    }
+                });
+                break;
+            case 4:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return rhv.getViews() - lhv.getViews();
+                    }
+                });
+                break;
+            case 5:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return (int) Math.round(2 * (lhv.getComplexity() - rhv.getComplexity()));
+                    }
+                });
+                break;
+            case 6:
+                Collections.sort(temp, new Comparator<Recipe>() {
+                    @Override
+                    public int compare(Recipe lhv, Recipe rhv) {
+                        return (int) Math.round(2 * (rhv.getComplexity() - lhv.getComplexity()));
+                    }
+                });
+                break;
+            default:
+                break;
+        }
+        CustomDiffUtilCallback cduc = new CustomDiffUtilCallback(recipes, temp);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(cduc, true);
         recipes.clear();
-        notifyDataSetChanged();
+        recipes.addAll(temp);
+        diffResult.dispatchUpdatesTo(this);
     }
+
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -96,6 +182,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             }
         });
     }
+
 
     @Override
     public int getItemCount() {
@@ -150,5 +237,8 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         public String toString() {
             return super.toString() + " '" + mNameView.getText() + "'";
         }
+
     }
+
+
 }
