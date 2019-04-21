@@ -131,15 +131,18 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     }
 
     @Override
-    public void onRecipeListFragmentInteraction(Recipe item) {
+    public void onRecipeListFragmentInteraction(Recipe item, boolean isOnline) {
         ftrans = getSupportFragmentManager().beginTransaction();
-        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES);
+        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, isOnline);
         ftrans.replace(R.id.fragment_container, cif).addToBackStack(FULL_RECIPE).commit();
-        mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
+        if (isOnline)
+            mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
+        else
+            Toast.makeText(getApplicationContext(), getString(R.string.network_problem), Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    public void onRecipeLikeFragmentInteraction(Recipe item, int rate) {
+    public void onRecipeLikeFragmentInteraction(Recipe item, int rate, boolean isOnline) {
         String s = "recipe_like_" + item.getId();
         SharedPreferences.Editor editor = shp.edit();
         if (!shp.getBoolean(s, false)) {
@@ -151,7 +154,10 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         }
         editor.apply();
         item.setRate(rate);
-        mDB.getReference().child("recipes").child(item.getId().toString()).child("rate").setValue(rate);
+        if (isOnline)
+            mDB.getReference().child("recipes").child(item.getId().toString()).child("rate").setValue(rate);
+        else
+            Toast.makeText(getApplicationContext(), getString(R.string.network_problem), Toast.LENGTH_SHORT).show();
     }
 
     @Override

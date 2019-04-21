@@ -33,6 +33,14 @@ import com.squareup.picasso.Picasso;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.List;
 import java.util.Objects;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
@@ -44,6 +52,7 @@ public class RecipesFragment extends Fragment {
     protected static final String RECIPES = "recipes";
     protected static final String SHARED_PREFERENCES = "shared_preferences";
     protected static final String SORT_TYPE = "sort_type";
+    protected static final String RECIPES_SER = "/recipes_ser";
 
     protected int mColumnCount = 1;
     protected OnRecipeListFragmentInteractionListener mListener;
@@ -55,7 +64,8 @@ public class RecipesFragment extends Fragment {
     protected MyRecipeRecyclerViewAdapter recyclerViewAdapter;
     protected String[] sortParams;
     protected int sortType;
-
+    protected String path;
+    protected boolean isOnline;
 
     public RecipesFragment() {
     }
@@ -74,6 +84,7 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isOnline = isOnline();
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
             filter = getArguments().getBoolean(ARG_FILTER);
@@ -87,9 +98,20 @@ public class RecipesFragment extends Fragment {
             shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
         }
 
+        progressBar = getActivity().findViewById(R.id.load_data);
+
+        path = getActivity().getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
+
         recyclerViewAdapter = new MyRecipeRecyclerViewAdapter(shp, mListener, mLikeListener);
-        DatabaseReference recipesRef = FirebaseDatabase.getInstance().getReference().child(RECIPES);
-        recipesRef.addValueEventListener(new CustomRecipeValueEventListener());
+        recyclerViewAdapter.setOnline(isOnline);
+
+        if (isOnline) {
+            DatabaseReference recipesRef = FirebaseDatabase.getInstance().getReference().child(RECIPES);
+            recipesRef.addValueEventListener(new CustomRecipeValueEventListener());
+        } else {
+            readSerializedData();
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -105,9 +127,8 @@ public class RecipesFragment extends Fragment {
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
 
-        recyclerView.setItemAnimator(new LandingAnimator());
-        progressBar = getActivity().findViewById(R.id.load_data);
 
+        recyclerView.setItemAnimator(new LandingAnimator());
         recyclerView.setAdapter(recyclerViewAdapter);
 
         sortParams = getResources().getStringArray(R.array.sort_params);
@@ -165,12 +186,58 @@ public class RecipesFragment extends Fragment {
         mListener = null;
     }
 
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!filter)
+            writeSerializedData();
+    }
+
+    void writeSerializedData() {
+        try {
+            FileOutputStream fout = new FileOutputStream(path);
+            ObjectOutputStream oos = new ObjectOutputStream(fout);
+            oos.writeObject(recyclerViewAdapter.getRecipes());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void readSerializedData() {
+
+        try {
+            FileInputStream streamIn = new FileInputStream(path);
+            ObjectInputStream objectinputstream = new ObjectInputStream(streamIn);
+            List<Recipe> recipes = (List<Recipe>) objectinputstream.readObject();
+
+            if (filter) {
+                for (Recipe recipe : recipes) {
+                    if (shp.getBoolean("recipe_like_" + Objects.requireNonNull(recipe).getId(), false))
+                        recyclerViewAdapter.addOrChange(recipe, recipe.getId());
+                    else
+                        recyclerViewAdapter.remove(recipe);
+                }
+            } else
+                for (Recipe recipe : recipes)
+                    recyclerViewAdapter.addOrChange(recipe, recipe.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (sortType > 0) {
+            sortSpinner.setSelection(sortType);
+            recyclerViewAdapter.sort(sortType);
+        }
+    }
+
     public interface OnRecipeListFragmentInteractionListener {
-        void onRecipeListFragmentInteraction(Recipe item);
+        void onRecipeListFragmentInteraction(Recipe item, boolean isOnline);
     }
 
     public interface OnRecipeLikeFragmentInteractionListener {
-        void onRecipeLikeFragmentInteraction(Recipe item, int rate);
+        void onRecipeLikeFragmentInteraction(Recipe item, int rate, boolean isOnline);
     }
 
     class CustomRecipeValueEventListener implements ValueEventListener {
@@ -243,5 +310,20 @@ public class RecipesFragment extends Fragment {
             }
             return view;
         }
+    }
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

@@ -30,15 +30,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * TODO: Replace the implementation with code for your data type.
- */
 public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRecyclerViewAdapter.ViewHolder> {
 
     private final List<Recipe> recipes;
     private final RecipesFragment.OnRecipeListFragmentInteractionListener mListener;
     private final RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
     private SharedPreferences shp;
+    private boolean isOnline;
 
 
     public MyRecipeRecyclerViewAdapter(SharedPreferences shp,
@@ -63,17 +61,16 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     }
 
     public void remove(Recipe recipe) {
-        if(recipes.contains(recipe)) {
+        if (recipes.contains(recipe)) {
             int position = recipes.indexOf(recipe);
             recipes.remove(position);
             notifyItemRemoved(position);
         }
     }
 
-    public void sort(int i){
+    public void sort(int i) {
         ArrayList<Recipe> temp = new ArrayList<>(recipes);
-        switch (i)
-        {
+        switch (i) {
             case 0:
                 Collections.sort(temp, new Comparator<Recipe>() {
                     @Override
@@ -156,15 +153,15 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                        int rate = holder.recipe.getRate();
-                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe, rate);
-                        if (shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
-                            Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
-                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
-                        } else {
-                            Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
-                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
-                        }
+                    int rate = holder.recipe.getRate();
+                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe, rate, isOnline);
+                    if (shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
+                        Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
+                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
+                    } else {
+                        Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
+                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
+                    }
                 }
             }
         });
@@ -175,7 +172,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
                     Integer views = holder.recipe.getViews();
                     holder.mViewsNum.setText(StringFormatter.formStringValueFromInt(++views));
                     holder.recipe.setViews(views);
-                    mListener.onRecipeListFragmentInteraction(holder.recipe);
+                    mListener.onRecipeListFragmentInteraction(holder.recipe, isOnline);
                 }
             }
         });
@@ -185,6 +182,19 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     @Override
     public int getItemCount() {
         return recipes.size();
+    }
+
+
+    public List<Recipe> getRecipes() {
+        return recipes;
+    }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(boolean online) {
+        isOnline = online;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

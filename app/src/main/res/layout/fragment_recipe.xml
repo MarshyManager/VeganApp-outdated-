@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="120dp"
     android:orientation="horizontal" >
@@ -66,7 +67,8 @@
                 android:src="@drawable/like"
                 android:layout_toStartOf="@+id/dish_views_num"
                 android:layout_above="@+id/dish_views_image"
-                android:layout_marginEnd="5dp" />
+                android:layout_marginEnd="5dp"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:id="@+id/dish_views_num"
@@ -86,7 +88,8 @@
                 android:background="@drawable/eye"
                 android:layout_alignParentBottom="true"
                 android:layout_toStartOf="@+id/dish_views_num"
-                android:layout_marginEnd="5dp" />
+                android:layout_marginEnd="5dp"
+                tools:ignore="ContentDescription" />
 
         </RelativeLayout>
 
