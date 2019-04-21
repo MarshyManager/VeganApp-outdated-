@@ -20,6 +20,7 @@ public class CookInstructionFragment extends Fragment {
 
     protected static final String RECIPE = "recipe";
     protected static final String SHARED_PREFERENCES = "shared_preferences";
+    protected static final String IS_ONLINE = "is_online";
 
     protected Recipe recipe;
     protected TextView mNameView;
@@ -33,16 +34,18 @@ public class CookInstructionFragment extends Fragment {
     protected ImageView mRateImage;
     protected SharedPreferences shp;
     protected RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
+    protected boolean isOnline;
 
 
     public CookInstructionFragment() {
     }
 
-    public static CookInstructionFragment newInstance(Recipe recipe, String sharedPreferences) {
+    public static CookInstructionFragment newInstance(Recipe recipe, String sharedPreferences, boolean isOnline) {
         CookInstructionFragment fragment = new CookInstructionFragment();
 
         Bundle args = new Bundle();
         fragment.recipe = recipe;
+        args.putBoolean(IS_ONLINE, isOnline);
         args.putString(SHARED_PREFERENCES, sharedPreferences);
         fragment.setArguments(args);
         return fragment;
@@ -54,14 +57,19 @@ public class CookInstructionFragment extends Fragment {
         if (savedInstanceState != null) {
             recipe = (Recipe) savedInstanceState.getSerializable(RECIPE);
             shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
+            isOnline = savedInstanceState.getBoolean(IS_ONLINE);
         }
-        shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
+        else if (getArguments() != null) {
+            isOnline = getArguments().getBoolean(IS_ONLINE);
+            shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
+        }
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View v = inflater.inflate(R.layout.fragment_cook_instruction, container, false);
         mRateNum = v.findViewById(R.id.instr_rate_num);
         mViewsNum = v.findViewById(R.id.instr_views_num);
@@ -97,7 +105,7 @@ public class CookInstructionFragment extends Fragment {
             public void onClick(View view) {
                 if (null != mLikeListener) {
                         int rate = recipe.getRate();
-                        mLikeListener.onRecipeLikeFragmentInteraction(recipe, rate);
+                        mLikeListener.onRecipeLikeFragmentInteraction(recipe, rate, isOnline);
                         if (shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
                             Picasso.with(view.getContext()).load(R.drawable.like_activ).into(mRateImage);
                             mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
@@ -115,6 +123,7 @@ public class CookInstructionFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(RECIPE, recipe);
+        outState.putBoolean(IS_ONLINE, isOnline);
         outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
         super.onSaveInstanceState(outState);
     }
