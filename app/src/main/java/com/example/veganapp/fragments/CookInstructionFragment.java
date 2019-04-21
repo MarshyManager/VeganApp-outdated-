@@ -3,27 +3,23 @@ package com.example.veganapp.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.util.Log;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.veganapp.R;
-import com.example.veganapp.activities.MainActivity;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.support_classes.StringFormatter;
-import com.google.firebase.FirebaseException;
 import com.squareup.picasso.Picasso;
 
 public class CookInstructionFragment extends Fragment {
 
-    final String RECIPE = "recipe";
-    static final String SHARED_PREFERENCES = "shared_preferences";
+    protected static final String RECIPE = "recipe";
+    protected static final String SHARED_PREFERENCES = "shared_preferences";
 
     protected Recipe recipe;
     protected TextView mNameView;
@@ -100,20 +96,15 @@ public class CookInstructionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                    try {
-                        mLikeListener.onRecipeLikeFragmentInteraction(recipe);
-                        Integer rate = Integer.parseInt(mRateNum.getText().toString());
-                        if (!shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
+                        int rate = recipe.getRate();
+                        mLikeListener.onRecipeLikeFragmentInteraction(recipe, rate);
+                        if (shp.getBoolean("recipe_like_" + recipe.getId(), false)) {
                             Picasso.with(view.getContext()).load(R.drawable.like_activ).into(mRateImage);
-                            mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
+                            mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
                         } else {
                             Picasso.with(view.getContext()).load(R.drawable.like).into(mRateImage);
-                            mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                            mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
                         }
-                        recipe.setRate(rate);
-                    } catch (FirebaseException e) {
-                        Toast.makeText(getActivity(), "Error occurred! Connection problem!", Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
         });
@@ -138,6 +129,7 @@ public class CookInstructionFragment extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
 
     @Override
     public void onDestroy() {

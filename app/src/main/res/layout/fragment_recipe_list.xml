@@ -8,14 +8,13 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar_recipe"
         android:layout_width="match_parent"
-        android:layout_height="50dp" >
-
+        android:layout_height="60dp" >
 
             <Spinner
                 android:id="@+id/sort_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:spinnerMode="dropdown"
                 tools:listitem="@layout/sort_spinner_item"
                 android:gravity="center"/>
@@ -31,7 +30,6 @@
         android:layout_marginLeft="16dp"
         android:layout_marginTop="0dp"
         android:layout_marginRight="16dp"
-        app:layoutManager="LinearLayoutManager"
         tools:context=".fragments.RecipesFragment"
         tools:listitem="@layout/fragment_recipe" />
 
