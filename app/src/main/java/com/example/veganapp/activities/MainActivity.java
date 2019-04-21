@@ -1,22 +1,25 @@
 package com.example.veganapp.activities;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import androidx.fragment.app.FragmentTransaction;
+
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
@@ -38,23 +41,21 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         RecipesFragment.OnRecipeLikeFragmentInteractionListener, MapFragment.OnFragmentInteractionListener {
 
     static final String APP_PREFERENCES = "settings";
-    final String RECIPES = "recipes";
-    final String RESTAURANTS = "restaurants";
+    static final String RECIPES = "recipes";
+    static final String FULL_RECIPE = "full_recipe";
+
 
     protected List<Recipe> recipes;
     protected List<Restaurant> restaurants;
     protected FirebaseDatabase mDB;
+    protected FragmentManager fm;
     protected FragmentTransaction ftrans;
     protected SharedPreferences shp;
 
-    DatabaseReference DBRecipes;
+    protected DatabaseReference DBRecipes;
 
     protected ProgressBar progressBar;
-
-    enum ListType {
-        RECIPES,
-        RESTAURANTS
-    }
+    protected BottomNavigationView navigation;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -62,22 +63,23 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             RecipesFragment recipesFragment;
-//            progressBar.setVisibility(View.VISIBLE);
+            fm = getSupportFragmentManager();
+            progressBar.setVisibility(View.VISIBLE);
+            fm.popBackStack(FULL_RECIPE, 0);
+            ftrans = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_recipe_list:
                     recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, false);
-                    ftrans = getFragmentManager().beginTransaction();
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
                 case R.id.navigation_favourite:
                     recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, true);
-                    ftrans = getFragmentManager().beginTransaction();
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
                 case R.id.navigation_map:
                     MapFragment mapFragment = MapFragment.newInstance(restaurants);
-                    ftrans = getFragmentManager().beginTransaction();
                     ftrans.replace(R.id.fragment_container, mapFragment).commit();
+                    progressBar.setVisibility(View.GONE);
                     return true;
             }
             return false;
@@ -94,21 +96,26 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
 
         shp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
 
-        progressBar = findViewById(R.id.loadData);
+        progressBar = findViewById(R.id.load_data);
 
         mDB = FirebaseDatabase.getInstance();
         DBRecipes = mDB.getReference(RECIPES);
-        DatabaseReference DBRestaurants = mDB.getReference(RESTAURANTS);
+
+//        DatabaseReference DBRestaurants = mDB.getReference(RESTAURANTS);
 
         recipes = new ArrayList<>();
         restaurants = new ArrayList<>();
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        RecipesFragment recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, false);
-        ftrans = getFragmentManager().beginTransaction();
-        ftrans.replace(R.id.fragment_container, recipesFragment).commit();
+        fm = getSupportFragmentManager();
+        if (fm.getFragments().size() == 0) {
+            ftrans = fm.beginTransaction();
+            RecipesFragment recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, false);
+            ftrans.replace(R.id.fragment_container, recipesFragment).commit();
+        }
+
     }
 
     @Override
@@ -125,29 +132,41 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
 
     @Override
     public void onRecipeListFragmentInteraction(Recipe item) {
-        ftrans = getFragmentManager().beginTransaction();
+        ftrans = getSupportFragmentManager().beginTransaction();
         CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES);
-        ftrans.replace(R.id.fragment_container, cif).addToBackStack(null).commit();
+        ftrans.replace(R.id.fragment_container, cif).addToBackStack(FULL_RECIPE).commit();
         mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
     }
 
     @Override
-    public void onRecipeLikeFragmentInteraction(Recipe item) throws FirebaseException {
+    public void onRecipeLikeFragmentInteraction(Recipe item, int rate) {
         String s = "recipe_like_" + item.getId();
         SharedPreferences.Editor editor = shp.edit();
-        if (mDB.getReference().child("recipes").child(item.getId().toString()).child("rate").setValue(item.getRate()).isSuccessful()) {
-            if (!shp.getBoolean(s, false))
-                editor.putBoolean(s, true);
-            else
-                editor.putBoolean(s, false);
-            editor.apply();
-        } else throw new FirebaseException("Database is not available");
+        if (!shp.getBoolean(s, false)) {
+            editor.putBoolean(s, true);
+            ++rate;
+        } else {
+            editor.putBoolean(s, false);
+            --rate;
+        }
+        editor.apply();
+        item.setRate(rate);
+        mDB.getReference().child("recipes").child(item.getId().toString()).child("rate").setValue(rate);
     }
 
+    @Override
+    public void onBackPressed() {
+        if ((navigation.getSelectedItemId() != R.id.navigation_recipe_list)
+                && (getSupportFragmentManager().getBackStackEntryCount() == 0))
+            navigation.setSelectedItemId(R.id.navigation_recipe_list);
+        else
+            super.onBackPressed();
+    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 }
+
 

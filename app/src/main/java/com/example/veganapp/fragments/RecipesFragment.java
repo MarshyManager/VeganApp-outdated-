@@ -2,10 +2,9 @@ package com.example.veganapp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.app.Fragment;
 
+import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,24 +17,23 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.veganapp.custom_adapters.MyRecipeRecyclerViewAdapter;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
-import com.google.firebase.FirebaseException;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
@@ -43,7 +41,7 @@ public class RecipesFragment extends Fragment {
 
     protected static final String ARG_COLUMN_COUNT = "column-count";
     protected static final String ARG_FILTER = "filter";
-    protected final String RECIPES = "recipes";
+    protected static final String RECIPES = "recipes";
     protected static final String SHARED_PREFERENCES = "shared_preferences";
     protected static final String SORT_TYPE = "sort_type";
 
@@ -51,6 +49,8 @@ public class RecipesFragment extends Fragment {
     protected OnRecipeListFragmentInteractionListener mListener;
     protected OnRecipeLikeFragmentInteractionListener mLikeListener;
     protected SharedPreferences shp;
+    protected Spinner sortSpinner;
+    protected ProgressBar progressBar;
     protected boolean filter;
     protected MyRecipeRecyclerViewAdapter recyclerViewAdapter;
     protected String[] sortParams;
@@ -63,7 +63,7 @@ public class RecipesFragment extends Fragment {
     public static RecipesFragment newInstance(String sharedPreferences, int columnCount, boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
-        args.putInt(SORT_TYPE, -1);
+        args.putInt(SORT_TYPE, 0);
         args.putBoolean(ARG_FILTER, filter);
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         args.putString(SHARED_PREFERENCES, sharedPreferences);
@@ -94,7 +94,7 @@ public class RecipesFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
 
         Context context = view.getContext();
@@ -106,12 +106,13 @@ public class RecipesFragment extends Fragment {
         }
 
         recyclerView.setItemAnimator(new LandingAnimator());
+        progressBar = getActivity().findViewById(R.id.load_data);
 
         recyclerView.setAdapter(recyclerViewAdapter);
 
         sortParams = getResources().getStringArray(R.array.sort_params);
 
-        Spinner sortSpinner = view.findViewById(R.id.sort_spinner);
+        sortSpinner = view.findViewById(R.id.sort_spinner);
         final SortSpinnerCustomAdapter spinnerCustomAdapter = new SortSpinnerCustomAdapter(view.getContext(), R.layout.sort_spinner_item, sortParams);
         spinnerCustomAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sortSpinner.setAdapter(spinnerCustomAdapter);
@@ -121,11 +122,11 @@ public class RecipesFragment extends Fragment {
 
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (isFirstTime)
-                {
+                if (isFirstTime) {
                     isFirstTime = false;
                     return;
                 }
+                sortType = i;
                 recyclerViewAdapter.sort(i);
             }
 
@@ -134,10 +135,8 @@ public class RecipesFragment extends Fragment {
 
             }
         });
-
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -156,6 +155,7 @@ public class RecipesFragment extends Fragment {
         outState.putInt(ARG_COLUMN_COUNT, getArguments().getInt(ARG_COLUMN_COUNT));
         outState.putBoolean(ARG_FILTER, filter);
         outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
+        outState.putInt(SORT_TYPE, sortType);
         super.onSaveInstanceState(outState);
     }
 
@@ -170,7 +170,7 @@ public class RecipesFragment extends Fragment {
     }
 
     public interface OnRecipeLikeFragmentInteractionListener {
-        void onRecipeLikeFragmentInteraction(Recipe item) throws FirebaseException;
+        void onRecipeLikeFragmentInteraction(Recipe item, int rate);
     }
 
     class CustomRecipeValueEventListener implements ValueEventListener {
@@ -181,15 +181,24 @@ public class RecipesFragment extends Fragment {
             if (filter) {
                 for (DataSnapshot unit : dataSnapshot.getChildren()) {
                     Recipe recipe = unit.getValue(Recipe.class);
-                    if (shp.getBoolean("recipe_like_" + recipe.getId(), false))
+
+                    if (shp.getBoolean("recipe_like_" + Objects.requireNonNull(recipe).getId(), false))
                         recyclerViewAdapter.addOrChange(recipe, recipe.getId());
+                    else
+                        recyclerViewAdapter.remove(recipe);
                 }
             } else {
                 for (DataSnapshot unit : dataSnapshot.getChildren()) {
                     Recipe recipe = unit.getValue(Recipe.class);
-                    recyclerViewAdapter.addOrChange(recipe, recipe.getId());
+                    recyclerViewAdapter.addOrChange(recipe, Objects.requireNonNull(recipe).getId());
                 }
             }
+            if (sortType > 0) {
+                sortSpinner.setSelection(sortType);
+                recyclerViewAdapter.sort(sortType);
+            }
+            progressBar.setVisibility(View.GONE);
+
         }
 
         @Override
@@ -201,7 +210,7 @@ public class RecipesFragment extends Fragment {
     public class SortSpinnerCustomAdapter extends ArrayAdapter<String> {
 
         SortSpinnerCustomAdapter(Context context, int textViewResourceId,
-                                        String[] objects) {
+                                 String[] objects) {
             super(context, textViewResourceId, objects);
 
         }
@@ -209,17 +218,17 @@ public class RecipesFragment extends Fragment {
 
         @Override
         public View getDropDownView(int position, View convertView,
-                                    ViewGroup parent) {
+                                    @NotNull ViewGroup parent) {
             return getCustomView(position, convertView, parent);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NotNull ViewGroup parent) {
 
             return getCustomView(position, convertView, parent);
         }
 
-        public View getCustomView(int position, View convertView, ViewGroup parent) {
+        View getCustomView(int position, View convertView, ViewGroup parent) {
 
             LayoutInflater inflater = getActivity().getLayoutInflater();
             View view = inflater.inflate(R.layout.sort_spinner_item, parent, false);
@@ -229,10 +238,8 @@ public class RecipesFragment extends Fragment {
 
             tv.setText(sortParams[position]);
             if (position != 0) {
-                if (position % 2 == 0)
-                    iv.setImageResource(R.drawable.sort_descending);
-                else
-                    iv.setImageResource(R.drawable.sort_ascending);
+                int id = position % 2 == 0 ? R.drawable.sort_descending : R.drawable.sort_ascending;
+                Picasso.with(this.getContext()).load(id).into(iv);
             }
             return view;
         }

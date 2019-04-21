@@ -51,10 +51,10 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     }
 
 
-    public void addOrChange(Recipe recipe, int position) {
+    public void addOrChange(Recipe recipe, int id) {
         if (!recipes.contains(recipe)) {
             recipes.add(recipe);
-            notifyItemInserted(position);
+            notifyItemInserted(id);
         } else {
             int index = recipes.indexOf(recipe);
             recipes.set(index, recipe);
@@ -62,9 +62,12 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         }
     }
 
-    public void remove(int position) {
-        recipes.remove(position);
-        notifyItemRemoved(position);
+    public void remove(Recipe recipe) {
+        if(recipes.contains(recipe)) {
+            int position = recipes.indexOf(recipe);
+            recipes.remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     public void sort(int i){
@@ -153,20 +156,15 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                    try {
-                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
-                        Integer rate = holder.recipe.getRate();
-                        if (!shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
+                        int rate = holder.recipe.getRate();
+                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe, rate);
+                        if (shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
                             Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
-                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(++rate));
+                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                         } else {
                             Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
-                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(--rate));
+                            holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                         }
-                        holder.recipe.setRate(rate);
-                    } catch (FirebaseException e) {
-                        Toast.makeText(view.getContext(), "Error occurred! Connection problem!", Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
         });
