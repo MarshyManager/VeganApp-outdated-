@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.example.veganapp.support_classes.LikeValueChanged;
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,8 +31,11 @@ import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.google.firebase.FirebaseException;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.yandex.mapkit.MapKitFactory;
 
 import java.util.ArrayList;
@@ -131,33 +135,29 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     }
 
     @Override
-    public void onRecipeListFragmentInteraction(Recipe item, boolean isOnline) {
+    public void onRecipeListFragmentInteraction(Recipe item, RecipesFragment recipesFragment) {
         ftrans = getSupportFragmentManager().beginTransaction();
-        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, isOnline);
+        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, recipesFragment);
         ftrans.replace(R.id.fragment_container, cif).addToBackStack(FULL_RECIPE).commit();
-        if (isOnline)
-            mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
-        else
-            Toast.makeText(getApplicationContext(), getString(R.string.network_problem), Toast.LENGTH_SHORT).show();
+        mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
     }
 
     @Override
-    public void onRecipeLikeFragmentInteraction(Recipe item, int rate, boolean isOnline) {
-        String s = "recipe_like_" + item.getId();
+    public void onRecipeLikeFragmentInteraction(Recipe item) {
+        final String offlineLike = "recipe_offline_like_" + item.getId();
+        final String onlineLike = "recipe_online_like_" + item.getId();
+        int dif;
         SharedPreferences.Editor editor = shp.edit();
-        if (!shp.getBoolean(s, false)) {
-            editor.putBoolean(s, true);
-            ++rate;
+        if (!shp.getBoolean(offlineLike, false)) {
+            editor.putBoolean(offlineLike, true);
+            dif = +1;
         } else {
-            editor.putBoolean(s, false);
-            --rate;
+            editor.putBoolean(offlineLike, false);
+            dif = -1;
         }
         editor.apply();
-        item.setRate(rate);
-        if (isOnline)
-            mDB.getReference().child("recipes").child(item.getId().toString()).child("rate").setValue(rate);
-        else
-            Toast.makeText(getApplicationContext(), getString(R.string.network_problem), Toast.LENGTH_SHORT).show();
+        item.setRate(item.getRate() + dif);
+        mDB.getReference(RECIPES + "/" + String.valueOf(item.getId()) + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, shp));
     }
 
     @Override

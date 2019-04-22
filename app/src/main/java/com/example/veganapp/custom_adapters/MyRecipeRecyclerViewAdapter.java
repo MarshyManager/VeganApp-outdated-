@@ -1,31 +1,31 @@
 package com.example.veganapp.custom_adapters;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.daimajia.swipe.SimpleSwipeListener;
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.example.veganapp.support_classes.StringFormatter;
-import com.google.firebase.FirebaseException;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,16 +36,21 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     private final RecipesFragment.OnRecipeListFragmentInteractionListener mListener;
     private final RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
     private SharedPreferences shp;
-    private boolean isOnline;
+    private RecipesFragment recipesFragment;
+    boolean filter;
+
 
 
     public MyRecipeRecyclerViewAdapter(SharedPreferences shp,
                                        RecipesFragment.OnRecipeListFragmentInteractionListener listener,
-                                       RecipesFragment.OnRecipeLikeFragmentInteractionListener likeListener) {
+                                       RecipesFragment.OnRecipeLikeFragmentInteractionListener likeListener,
+                                       RecipesFragment recipesFragment, boolean filter) {
         mListener = listener;
         mLikeListener = likeListener;
         this.shp = shp;
         recipes = new ArrayList<>();
+        this.recipesFragment = recipesFragment;
+        this.filter = filter;
     }
 
 
@@ -148,31 +153,84 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.bind(recipes.get(position));
+        holder.mSwipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
+        if (filter) {
+            holder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, holder.mSwipeLayout.findViewById(R.id.delete_background));
+            holder.mSwipeLayout.addSwipeListener(new SimpleSwipeListener() {
+
+                @Override
+                public void onOpen(SwipeLayout layout) {
+                    YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.trash));
+                }
+            });
+        }
+        else {
+            holder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, holder.mSwipeLayout.findViewById(R.id.fav_background));
+            holder.mSwipeLayout.addSwipeListener(new SimpleSwipeListener() {
+
+                @Override
+                public void onOpen(SwipeLayout layout) {
+                    YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.add_to_fav));
+                }
+            });
+        }
+
+        holder.mYesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                notifyItemChanged(holder.getAdapterPosition());
+            }
+        });
+
+        holder.mNoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                remove(holder.recipe);
+                SharedPreferences.Editor editor = shp.edit();
+                editor.putBoolean("recipe_fav_" + holder.recipe.getId(), false);
+                editor.apply();
+
+            }
+        });
+
+        holder.mFavImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = shp.edit();
+                if (!shp.getBoolean("recipe_fav_" + holder.recipe.getId(), false)) {
+                    Picasso.with(view.getContext()).load(R.drawable.favourite_recipes).into(holder.mFavImage);
+                    editor.putBoolean("recipe_fav_" + holder.recipe.getId(), true);
+                } else {
+                    Picasso.with(view.getContext()).load(R.drawable.favourite_recipes_inact).into(holder.mFavImage);
+                    editor.putBoolean("recipe_fav_" + holder.recipe.getId(), false);
+                }
+                editor.apply();
+            }
+        });
 
         holder.mDishRating.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                    int rate = holder.recipe.getRate();
-                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe, rate, isOnline);
-                    if (shp.getBoolean("recipe_like_" + holder.recipe.getId(), false)) {
+                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
+                    if (shp.getBoolean("recipe_offline_like_" + holder.recipe.getId(), false)) {
                         Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
-                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                     } else {
                         Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
-                        holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                     }
+                    holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                 }
             }
         });
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+
+        holder.mForeGround.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
                     Integer views = holder.recipe.getViews();
                     holder.mViewsNum.setText(StringFormatter.formStringValueFromInt(++views));
                     holder.recipe.setViews(views);
-                    mListener.onRecipeListFragmentInteraction(holder.recipe, isOnline);
+                    mListener.onRecipeListFragmentInteraction(holder.recipe, recipesFragment);
                 }
             }
         });
@@ -189,14 +247,6 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         return recipes;
     }
 
-    public boolean isOnline() {
-        return isOnline;
-    }
-
-    public void setOnline(boolean online) {
-        isOnline = online;
-    }
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView mNameView;
@@ -206,12 +256,18 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         final RatingBar mDishComplexity;
         final TextView mRateNum;
         final ImageView mDishRating;
+        final ImageView mFavImage;
+        final SwipeLayout mSwipeLayout;
+        final RelativeLayout mForeGround;
+        final Button mYesButton;
+        final Button mNoButton;
 
         Recipe recipe;
 
         ViewHolder(View view) {
             super(view);
             mView = view;
+            mForeGround = view.findViewById(R.id.view_foreground);
             mNameView = view.findViewById(R.id.dish_name);
             mViewsNum = view.findViewById(R.id.dish_views_num);
             mDishImage = view.findViewById(R.id.dish_image);
@@ -219,6 +275,10 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             mDishComplexity = view.findViewById(R.id.dish_complexity);
             mRateNum = view.findViewById(R.id.dish_rate_num);
             mDishRating = view.findViewById(R.id.dish_rating);
+            mFavImage = view.findViewById(R.id.add_to_fav);
+            mSwipeLayout = view.findViewById(R.id.swipe);
+            mYesButton = view.findViewById(R.id.restore_yes);
+            mNoButton = view.findViewById(R.id.restore_no);
         }
 
         void bind(Recipe recipe) {
@@ -228,10 +288,15 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
             mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
 
-            if (!shp.getBoolean("recipe_like_" + recipe.getId(), false))
+            if (!shp.getBoolean("recipe_offline_like_" + recipe.getId(), false))
                 Picasso.with(mView.getContext()).load(R.drawable.like).into(mDishRating);
             else
                 Picasso.with(mView.getContext()).load(R.drawable.like_activ).into(mDishRating);
+
+            if (!shp.getBoolean("recipe_fav_" + recipe.getId(), false))
+                Picasso.with(mView.getContext()).load(R.drawable.favourite_recipes_inact).into(mFavImage);
+            else
+                Picasso.with(mView.getContext()).load(R.drawable.favourite_recipes).into(mFavImage);
 
             String dishPhotoUrl = recipe.getUrlString();
 

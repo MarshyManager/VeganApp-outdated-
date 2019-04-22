@@ -17,7 +17,8 @@
             android:value="ca-app-pub-6896399861367141~2176832662"/>
         <activity
             android:name=".activities.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
