@@ -14,9 +14,9 @@
     <string name="add_to_fav">Add to fav</string>
     <string name="map">Map</string>
     <string name="recipe_deleted">Recipe deleted</string>
+    <string name="recipe_restored">Recipe restored</string>
     <string name="restore">Restore</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="restore_suggestion">Restore?</string>
 
 </resources>

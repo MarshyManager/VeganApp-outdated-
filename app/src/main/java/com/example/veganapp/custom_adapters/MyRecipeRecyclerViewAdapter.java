@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,22 +24,25 @@ import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.example.veganapp.support_classes.StringFormatter;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRecyclerViewAdapter.ViewHolder> {
 
-    private final List<Recipe> recipes;
+    private final CopyOnWriteArrayList<Recipe> recipes;
     private final RecipesFragment.OnRecipeListFragmentInteractionListener mListener;
     private final RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
     private SharedPreferences shp;
     private RecipesFragment recipesFragment;
     boolean filter;
-
 
 
     public MyRecipeRecyclerViewAdapter(SharedPreferences shp,
@@ -48,16 +52,22 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         mListener = listener;
         mLikeListener = likeListener;
         this.shp = shp;
-        recipes = new ArrayList<>();
+        recipes = new CopyOnWriteArrayList<>();
         this.recipesFragment = recipesFragment;
         this.filter = filter;
     }
 
+    public void insert(Recipe recipe, int pos) {
+        if (pos >= recipes.size())
+            pos = recipes.size() - 1;
+        recipes.add(pos, recipe);
+        notifyItemInserted(pos);
+    }
 
-    public void addOrChange(Recipe recipe, int id) {
+    public void addOrChange(Recipe recipe) {
         if (!recipes.contains(recipe)) {
             recipes.add(recipe);
-            notifyItemInserted(id);
+            notifyItemInserted(recipes.size() - 1);
         } else {
             int index = recipes.indexOf(recipe);
             recipes.set(index, recipe);
@@ -66,11 +76,16 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     }
 
     public void remove(Recipe recipe) {
-        if (recipes.contains(recipe)) {
-            int position = recipes.indexOf(recipe);
-            recipes.remove(position);
-            notifyItemRemoved(position);
+        int pos;
+        if ((pos = recipes.indexOf(recipe)) >= 0) {
+            recipes.remove(recipe);
+            notifyItemRemoved(pos);
         }
+    }
+
+    public void removeAt(int pos) {
+        recipes.remove(pos);
+        notifyItemRemoved(pos);
     }
 
     public void sort(int i) {
@@ -151,7 +166,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.bind(recipes.get(position));
         holder.mSwipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
         if (filter) {
@@ -160,12 +175,31 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
 
                 @Override
                 public void onOpen(SwipeLayout layout) {
-                    YoYo.with(Techniques.Tada).duration(500).delay(100).playOn(layout.findViewById(R.id.trash));
+                    final Recipe recipe = holder.recipe;
+                    final int pos = holder.getLayoutPosition();
+                    remove(recipe);
+                    SharedPreferences.Editor editor = shp.edit();
+                    editor.putBoolean("recipe_fav_" + holder.recipe.getId(), false);
+                    editor.apply();
+                    Snackbar.make(recipesFragment.getView(), R.string.recipe_deleted, Snackbar.LENGTH_LONG)
+                            .setActionTextColor(0xFF0000FF)
+                            .setAnchorView(R.id.navigation)
+                            .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE)
+                            .setAction(R.string.restore, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    insert(recipe, pos);
+                                    SharedPreferences.Editor editor = shp.edit();
+                                    editor.putBoolean("recipe_fav_" + holder.recipe.getId(), true);
+                                    editor.apply();
+                                    Snackbar.make(recipesFragment.getView(), R.string.recipe_restored, Snackbar.LENGTH_SHORT)
+                                            .setAnchorView(R.id.navigation)
+                                            .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_FADE).show();
+                                }
+                            }).show();
                 }
             });
-        }
-        else {
-            holder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, holder.mSwipeLayout.findViewById(R.id.fav_background));
+        } else {
             holder.mSwipeLayout.addSwipeListener(new SimpleSwipeListener() {
 
                 @Override
@@ -174,24 +208,6 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
                 }
             });
         }
-
-        holder.mYesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                notifyItemChanged(holder.getAdapterPosition());
-            }
-        });
-
-        holder.mNoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                remove(holder.recipe);
-                SharedPreferences.Editor editor = shp.edit();
-                editor.putBoolean("recipe_fav_" + holder.recipe.getId(), false);
-                editor.apply();
-
-            }
-        });
 
         holder.mFavImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,7 +228,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             @Override
             public void onClick(View view) {
                 if (null != mLikeListener) {
-                        mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
+                    mLikeListener.onRecipeLikeFragmentInteraction(holder.recipe);
                     if (shp.getBoolean("recipe_offline_like_" + holder.recipe.getId(), false)) {
                         Picasso.with(view.getContext()).load(R.drawable.like_activ).into(holder.mDishRating);
                     } else {
@@ -259,8 +275,6 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         final ImageView mFavImage;
         final SwipeLayout mSwipeLayout;
         final RelativeLayout mForeGround;
-        final Button mYesButton;
-        final Button mNoButton;
 
         Recipe recipe;
 
@@ -277,8 +291,6 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             mDishRating = view.findViewById(R.id.dish_rating);
             mFavImage = view.findViewById(R.id.add_to_fav);
             mSwipeLayout = view.findViewById(R.id.swipe);
-            mYesButton = view.findViewById(R.id.restore_yes);
-            mNoButton = view.findViewById(R.id.restore_no);
         }
 
         void bind(Recipe recipe) {

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.example.veganapp.support_classes.LikeValueChanged;
+import com.example.veganapp.support_classes.ViewsValueChanged;
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,13 +30,9 @@ import com.example.veganapp.db_classes.Restaurant;
 import com.example.veganapp.fragments.CookInstructionFragment;
 import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
-import com.google.firebase.FirebaseException;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.yandex.mapkit.MapKitFactory;
 
 import java.util.ArrayList;
@@ -69,22 +66,22 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             RecipesFragment recipesFragment;
             fm = getSupportFragmentManager();
             progressBar.setVisibility(View.VISIBLE);
-            fm.popBackStack(FULL_RECIPE, 0);
+            fm.popBackStack(FULL_RECIPE, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             ftrans = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_recipe_list:
-                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, false);
+                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, false);
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
                 case R.id.navigation_favourite:
-                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, true);
+                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, true);
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
-                case R.id.navigation_map:
-                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
-                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
-                    progressBar.setVisibility(View.GONE);
-                    return true;
+//                case R.id.navigation_map:
+//                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
+//                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
+//                    progressBar.setVisibility(View.GONE);
+//                    return true;
             }
             return false;
         }
@@ -116,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         fm = getSupportFragmentManager();
         if (fm.getFragments().size() == 0) {
             ftrans = fm.beginTransaction();
-            RecipesFragment recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, 1, false);
+            RecipesFragment recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, false);
             ftrans.replace(R.id.fragment_container, recipesFragment).commit();
         }
 
@@ -139,7 +136,12 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         ftrans = getSupportFragmentManager().beginTransaction();
         CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, recipesFragment);
         ftrans.replace(R.id.fragment_container, cif).addToBackStack(FULL_RECIPE).commit();
-        mDB.getReference().child("recipes").child(item.getId().toString()).child("views").setValue(item.getViews());
+        SharedPreferences.Editor editor = shp.edit();
+        final String viewsNum = "views_dif_" + item.getId();
+        editor.putInt(viewsNum, shp.getInt(viewsNum, 0) + 1);
+        editor.apply();
+        mDB.getReference(RECIPES + "/" + String.valueOf(item.getId()) + "/views")
+                .addListenerForSingleValueEvent(new ViewsValueChanged(viewsNum, shp));
     }
 
     @Override
