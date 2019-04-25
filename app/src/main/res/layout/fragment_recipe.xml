@@ -1,176 +1,149 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:swipe="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
-    <com.daimajia.swipe.SwipeLayout xmlns:swipe="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/swipe"
+    <RelativeLayout
+        android:id="@+id/fav_background"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:background="@color/gold">
+
+        <ImageView
+            android:id="@+id/add_to_fav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="25dp"
+            android:src="@drawable/favourite_recipes"
+            tools:ignore="ContentDescription" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/delete_background"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        swipe:leftEdgeSwipeOffset="0dp"
-        swipe:rightEdgeSwipeOffset="0dp">
+        android:layout_height="match_parent"
+        android:background="#FFFF0000">
+
+        <ImageView
+            android:id="@+id/trash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="30dp"
+            android:src="@drawable/trash"
+            tools:ignore="ContentDescription" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="5dp"
+            android:layout_toEndOf="@id/trash"
+            android:text="@string/recipe_deleted" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_foreground"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#FF00ffff"
+        android:orientation="horizontal">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/dish_image"
+            android:layout_width="120dp"
+            android:layout_height="120dp" />
+
+        <TextView
+            android:id="@+id/dish_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="15dp"
+            android:layout_toEndOf="@id/dish_image"
+            android:maxLength="40"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/dish_complexity"
+            android:layout_marginStart="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_toEndOf="@id/dish_image"
+            android:text="@string/complexity"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+
+            />
+
+        <RatingBar
+            android:id="@+id/dish_complexity"
+            style="@style/ListRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toEndOf="@id/dish_image" />
 
         <RelativeLayout
-            android:id="@+id/fav_background"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:background="@color/gold">
-
-            <ImageView
-                android:id="@+id/add_to_fav"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="25dp"
-                android:src="@drawable/favourite_recipes"
-                tools:ignore="ContentDescription" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/delete_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#FFFF0000">
-
-            <ImageView
-                android:id="@+id/trash"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="15dp"
-                android:src="@drawable/trash"
-                tools:ignore="ContentDescription" />
-
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/restore_suggestion"
-                android:layout_toStartOf="@id/restore_yes"
-                android:layout_toEndOf="@id/trash"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="5dp"/>
-
-            <Button
-                android:id="@+id/restore_yes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/yes"
-                android:layout_toStartOf="@id/restore_no"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="5dp" />
-
-            <Button
-                android:id="@+id/restore_no"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/dish_rate_num"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:layout_above="@+id/dish_views_num"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:text="@string/no" />
+                android:layout_marginEnd="5dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
 
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/view_foreground"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:background="#FF00ffff"
-            android:orientation="horizontal">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/dish_image"
-                android:layout_width="120dp"
-                android:layout_height="120dp" />
+            <ImageView
+                android:id="@+id/dish_rating"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_above="@+id/dish_views_image"
+                android:layout_marginEnd="5dp"
+                android:layout_toStartOf="@+id/dish_views_num"
+                android:src="@drawable/like"
+                tools:ignore="ContentDescription" />
 
             <TextView
-                android:id="@+id/dish_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                android:maxLength="40"
-                android:layout_alignParentTop="true"
-                android:layout_toEndOf="@id/dish_image"
-                android:layout_marginStart="10dp"
-                />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/complexity"
-                android:textSize="15sp"
-                android:textColor="@color/black"
-                android:layout_toEndOf="@id/dish_image"
-                android:layout_above="@+id/dish_complexity"
-                android:layout_marginStart="15dp"
-                android:layout_marginBottom="5dp"
-
-                />
-
-            <RatingBar
-                android:id="@+id/dish_complexity"
-                style="@style/ListRate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/dish_views_num"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_toEndOf="@id/dish_image"
-                android:layout_marginStart="10dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginEnd="5dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true">
-
-                <TextView
-                    android:id="@+id/dish_rate_num"
-                    android:layout_width="40dp"
-                    android:layout_height="30dp"
-                    android:layout_above="@+id/dish_views_num"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="5dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textSize="20sp" />
-
-                <ImageView
-                    android:id="@+id/dish_rating"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_above="@+id/dish_views_image"
-                    android:layout_marginEnd="5dp"
-                    android:layout_toStartOf="@+id/dish_views_num"
-                    android:src="@drawable/like"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/dish_views_num"
-                    android:layout_width="40dp"
-                    android:layout_height="30dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="5dp"
-                    android:textAlignment="center"
-                    android:textColor="@color/black"
-                    android:textSize="20sp" />
-
-                <ImageView
-                    android:id="@+id/dish_views_image"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="5dp"
-                    android:layout_toStartOf="@+id/dish_views_num"
-                    android:background="@drawable/eye"
-                    tools:ignore="ContentDescription" />
-
-            </RelativeLayout>
+            <ImageView
+                android:id="@+id/dish_views_image"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="5dp"
+                android:layout_toStartOf="@+id/dish_views_num"
+                android:background="@drawable/eye"
+                tools:ignore="ContentDescription" />
 
         </RelativeLayout>
-    </com.daimajia.swipe.SwipeLayout>
-</LinearLayout>
+
+    </RelativeLayout>
+</com.daimajia.swipe.SwipeLayout>

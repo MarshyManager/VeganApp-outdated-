@@ -11,9 +11,9 @@
         android:icon="@drawable/favourite_recipes"
         android:title="@string/title_fav_recipes"/>
 
-    <item
-        android:id="@+id/navigation_map"
-        android:icon="@drawable/map"
-        android:title="@string/map"/>
+    <!--<item-->
+        <!--android:id="@+id/navigation_map"-->
+        <!--android:icon="@drawable/map"-->
+        <!--android:title="@string/map"/>-->
 
 </menu>

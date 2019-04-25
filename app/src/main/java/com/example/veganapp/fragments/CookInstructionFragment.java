@@ -3,6 +3,8 @@ package com.example.veganapp.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.support_classes.StringFormatter;
+import com.google.android.material.appbar.SubtitleCollapsingToolbarLayout;
 import com.squareup.picasso.Picasso;
 
 public class CookInstructionFragment extends Fragment {
@@ -74,11 +77,12 @@ public class CookInstructionFragment extends Fragment {
         mComplexity = v.findViewById(R.id.instr_complexity);
         mDishImage = v.findViewById(R.id.instr_image);
         mRateImage = v.findViewById(R.id.instr_rate);
-        mNameView = v.findViewById(R.id.instr_name);
-        mIngestionText = v.findViewById(R.id.instr_ingestion);
+        Toolbar toolbar = v.findViewById(R.id.cook_instruction_toolbar);
+        SubtitleCollapsingToolbarLayout sctl = v.findViewById(R.id.cook_instruction_toolbar_layout);
 
-        mNameView.setText(recipe.getName());
-        mIngestionText.setText(recipe.getIngestion());
+        sctl.setTitle(recipe.getName());
+        sctl.setSubtitle(recipe.getIngestion());
+
         mComplexity.setRating(recipe.getComplexity().floatValue());
         mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
         mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
@@ -96,6 +100,13 @@ public class CookInstructionFragment extends Fragment {
 
         mDishImage.setVisibility(dishPhotoUrl != null ? View.VISIBLE : View.GONE);
 
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().onBackPressed();
+            }
+        });
+
         mRateImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,7 +119,7 @@ public class CookInstructionFragment extends Fragment {
                             Picasso.with(view.getContext()).load(R.drawable.like).into(mRateImage);
                             mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
                         }
-                        parentFragment.writeSerializedData();
+                        parentFragment.writeRecipeList();
                 }
             }
         });

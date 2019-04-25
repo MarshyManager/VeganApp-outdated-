@@ -9,13 +9,13 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 
 public class LikeValueChanged implements ValueEventListener {
-    String onlineLike;
     String offlineLike;
+    String onlineLike;
     SharedPreferences shp;
 
     public LikeValueChanged(String offlineLike, String onlineLike, SharedPreferences shp) {
-        this.onlineLike = onlineLike;
         this.offlineLike = offlineLike;
+        this.onlineLike = onlineLike;
         this.shp = shp;
     }
 
