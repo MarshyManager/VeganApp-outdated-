@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.daimajia.easing:library:2.0@aar'
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
     implementation 'com.hendraanggrian.material:collapsingtoolbarlayout-subtitle:1.0.0'
-
+    implementation 'com.github.iammert:ReadableBottomBar:0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

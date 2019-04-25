@@ -2,6 +2,7 @@ package com.example.veganapp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.opengl.Visibility;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -20,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.veganapp.custom_adapters.MyRecipeRecyclerViewAdapter;
 import com.example.veganapp.R;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 public class RecipesFragment extends Fragment {
@@ -118,18 +121,14 @@ public class RecipesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
+        final SwipeRefreshLayout srl = view.findViewById(R.id.refresh_list);
 
         progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
-        if (progressBar != null)
-            progressBar.setVisibility(View.GONE);
 
         Context context = view.getContext();
         final RecyclerView recyclerView = view.findViewById(R.id.recipe_adapter);
-        if (mColumnCount <= 1) {
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        } else {
-            recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-        }
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
 
 
         recyclerView.setItemAnimator(new LandingAnimator());
@@ -158,6 +157,25 @@ public class RecipesFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
+            }
+        });
+
+        srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                isOnline = isOnline();
+                writeRecipeList();
+                recyclerViewAdapter.clear();
+                if (isOnline) {
+                    DatabaseReference recipesRef = db.getReference().child(RECIPES);
+                    recipesRef.addListenerForSingleValueEvent(new CustomRecipeValueEventListener());
+                }
+                else {
+                    readRecipeList();
+                    Toast.makeText(getActivity(), R.string.network_problem, Toast.LENGTH_SHORT).show();
+                }
+                recyclerViewAdapter.sort(sortType);
+                srl.setRefreshing(false);
             }
         });
         return view;
@@ -233,6 +251,7 @@ public class RecipesFragment extends Fragment {
     }
 
     void readRecipeList() {
+        recipes.clear();
         int iter = 0;
         Recipe recipe;
         while (true) {
@@ -241,6 +260,7 @@ public class RecipesFragment extends Fragment {
             else
                 break;
         }
+        progressBar.setVisibility(View.GONE);
     }
 
     Recipe readRecipe(int id) {
@@ -276,6 +296,7 @@ public class RecipesFragment extends Fragment {
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            recipes.clear();
             String offlineLike;
             String onlineLike;
             String viewsNum;
