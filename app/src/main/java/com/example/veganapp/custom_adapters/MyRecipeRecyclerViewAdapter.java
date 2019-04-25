@@ -88,6 +88,11 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         notifyItemRemoved(pos);
     }
 
+    public void clear(){
+        recipes.clear();
+        notifyDataSetChanged();
+    }
+
     public void sort(int i) {
         ArrayList<Recipe> temp = new ArrayList<>(recipes);
         switch (i) {
