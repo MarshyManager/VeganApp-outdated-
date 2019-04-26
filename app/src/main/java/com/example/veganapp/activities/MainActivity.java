@@ -8,6 +8,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.example.veganapp.db_classes.Ingredient;
+import com.example.veganapp.fragments.RecipeByIngredientFragment;
 import com.example.veganapp.support_classes.LikeValueChanged;
 import com.example.veganapp.support_classes.ViewsValueChanged;
 import com.google.android.gms.tasks.OnCanceledListener;
@@ -18,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     static final String APP_PREFERENCES = "settings";
     static final String RECIPES = "recipes";
     static final String FULL_RECIPE = "full_recipe";
-
+    protected static final String RECIPES_SER = "/recipes_ser";
 
     protected List<Recipe> recipes;
     protected List<Restaurant> restaurants;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
 
     protected ProgressBar progressBar;
     protected BottomNavigationView navigation;
+    protected String recipesPath;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -77,10 +81,15 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                     recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, true);
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
+                case R.id.navigation_pick_recipe:
+                    RecipeByIngredientFragment rbiFragment = RecipeByIngredientFragment.newInstance(recipesPath);
+                    progressBar.setVisibility(View.GONE);
+                    ftrans.replace(R.id.fragment_container, rbiFragment).commit();
+                    return true;
 //                case R.id.navigation_map:
 //                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
 //                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
-//                    progressBar.setVisibility(View.GONE);
+//                    mProgressBar.setVisibility(View.GONE);
 //                    return true;
             }
             return false;
@@ -92,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recipesPath = getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
         MapKitFactory.setApiKey("e85d69c5-1f52-4e55-863a-418618587a97");
         MapKitFactory.initialize(this);
 
@@ -117,6 +127,11 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             ftrans.replace(R.id.fragment_container, recipesFragment).commit();
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
     }
 
     @Override

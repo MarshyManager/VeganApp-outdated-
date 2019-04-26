@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.RecipeByIngredientFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_ingredient"
+        android:layout_width="match_parent"
+        android:layout_height="56dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_ingredient"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimary">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="20dp"
+                android:layout_marginStart="10dp"
+                android:gravity="center|start"
+                android:text="@string/add_ingredient" />
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ingredient_list"
+        android:name="com.example.veganapp.fragments.RecipeByIngridientFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/appbar_ingredient"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        tools:listitem="@layout/fragment_ingridient" />
+</RelativeLayout>

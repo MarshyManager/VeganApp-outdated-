@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -35,9 +37,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRecyclerViewAdapter.ViewHolder> {
+public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRecyclerViewAdapter.ViewHolder> implements Filterable {
 
     private final CopyOnWriteArrayList<Recipe> recipes;
+    private CopyOnWriteArrayList<Recipe> recipesFiltered;
     private final RecipesFragment.OnRecipeListFragmentInteractionListener mListener;
     private final RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
     private SharedPreferences shp;
@@ -53,24 +56,27 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         mLikeListener = likeListener;
         this.shp = shp;
         recipes = new CopyOnWriteArrayList<>();
+        recipesFiltered = new CopyOnWriteArrayList<>();
         this.recipesFragment = recipesFragment;
         this.filter = filter;
     }
-
     public void insert(Recipe recipe, int pos) {
-        if (pos >= recipes.size())
-            pos = recipes.size() - 1;
+        if (pos >= recipesFiltered.size())
+            pos = recipesFiltered.size() - 1;
         recipes.add(pos, recipe);
+        recipesFiltered.add(pos, recipe);
         notifyItemInserted(pos);
     }
 
     public void addOrChange(Recipe recipe) {
         if (!recipes.contains(recipe)) {
             recipes.add(recipe);
-            notifyItemInserted(recipes.size() - 1);
+            recipesFiltered.add(recipe);
+            notifyItemInserted(recipesFiltered.size() - 1);
         } else {
             int index = recipes.indexOf(recipe);
             recipes.set(index, recipe);
+            recipesFiltered.add(recipe);
             notifyItemChanged(index);
         }
     }
@@ -79,22 +85,25 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         int pos;
         if ((pos = recipes.indexOf(recipe)) >= 0) {
             recipes.remove(recipe);
+            recipesFiltered.remove(recipe);
             notifyItemRemoved(pos);
         }
     }
 
     public void removeAt(int pos) {
         recipes.remove(pos);
+        recipesFiltered.remove(pos);
         notifyItemRemoved(pos);
     }
 
     public void clear(){
         recipes.clear();
+        recipesFiltered.clear();
         notifyDataSetChanged();
     }
 
     public void sort(int i) {
-        ArrayList<Recipe> temp = new ArrayList<>(recipes);
+        ArrayList<Recipe> temp = new ArrayList<>(recipesFiltered);
         switch (i) {
             case 0:
                 Collections.sort(temp, new Comparator<Recipe>() {
@@ -155,10 +164,10 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
             default:
                 break;
         }
-        CustomDiffUtilCallback cduc = new CustomDiffUtilCallback(recipes, temp);
+        CustomDiffUtilCallback cduc = new CustomDiffUtilCallback(recipesFiltered, temp);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(cduc, true);
-        recipes.clear();
-        recipes.addAll(temp);
+        recipesFiltered.clear();
+        recipesFiltered.addAll(temp);
         diffResult.dispatchUpdatesTo(this);
     }
 
@@ -172,7 +181,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.bind(recipes.get(position));
+        holder.bind(recipesFiltered.get(position));
         holder.mSwipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
         if (filter) {
             holder.mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, holder.mSwipeLayout.findViewById(R.id.delete_background));
@@ -257,15 +266,48 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
         });
     }
 
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    recipesFiltered = recipes;
+                } else {
+                    CopyOnWriteArrayList<Recipe> filteredList = new CopyOnWriteArrayList<>();
+                    for (Recipe row : recipes) {
+
+                        if (row.getName().toLowerCase().contains(charString.toLowerCase()) || row.getIngestion().contains(charSequence)) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    recipesFiltered = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = recipesFiltered;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                recipesFiltered = (CopyOnWriteArrayList<Recipe>) filterResults.values;
+
+                notifyDataSetChanged();
+            }
+        };
+    }
 
     @Override
     public int getItemCount() {
-        return recipes.size();
+        return recipesFiltered.size();
     }
 
 
     public List<Recipe> getRecipes() {
-        return recipes;
+        return recipesFiltered;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

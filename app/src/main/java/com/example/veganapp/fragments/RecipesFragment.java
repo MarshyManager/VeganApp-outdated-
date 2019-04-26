@@ -1,24 +1,46 @@
 package com.example.veganapp.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.opengl.Visibility;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+
+import androidx.appcompat.widget.SearchView;
+
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,7 +74,6 @@ import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 public class RecipesFragment extends Fragment {
 
-    protected static final String ARG_COLUMN_COUNT = "column-count";
     protected static final String ARG_FILTER = "filter";
     protected static final String RECIPES = "recipes";
     protected static final String SHARED_PREFERENCES = "shared_preferences";
@@ -62,12 +83,11 @@ public class RecipesFragment extends Fragment {
     protected static final String RECIPES_ONLINE_LIKE = "recipe_online_like_";
 
     List<Recipe> recipes;
-    final protected int mColumnCount = 1;
     protected OnRecipeListFragmentInteractionListener mListener;
     protected OnRecipeLikeFragmentInteractionListener mLikeListener;
     protected SharedPreferences shp;
     protected Spinner sortSpinner;
-    protected ProgressBar progressBar;
+    protected ProgressBar mProgressBar;
     protected boolean filter;
     protected MyRecipeRecyclerViewAdapter recyclerViewAdapter;
     protected String[] sortParams;
@@ -75,6 +95,9 @@ public class RecipesFragment extends Fragment {
     protected String path;
     protected boolean isOnline;
     FirebaseDatabase db;
+    protected Toolbar mToolbar;
+    protected SearchView mSearchView;
+    public MenuItem mSearchItem;
 
     public RecipesFragment() {
     }
@@ -123,12 +146,12 @@ public class RecipesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
         final SwipeRefreshLayout srl = view.findViewById(R.id.refresh_list);
 
-        progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
+        mToolbar = view.findViewById(R.id.toolbar_recipe_list);
+        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
 
         Context context = view.getContext();
         final RecyclerView recyclerView = view.findViewById(R.id.recipe_adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
 
 
         recyclerView.setItemAnimator(new LandingAnimator());
@@ -169,8 +192,7 @@ public class RecipesFragment extends Fragment {
                 if (isOnline) {
                     DatabaseReference recipesRef = db.getReference().child(RECIPES);
                     recipesRef.addListenerForSingleValueEvent(new CustomRecipeValueEventListener());
-                }
-                else {
+                } else {
                     readRecipeList();
                     Toast.makeText(getActivity(), R.string.network_problem, Toast.LENGTH_SHORT).show();
                 }
@@ -178,8 +200,65 @@ public class RecipesFragment extends Fragment {
                 srl.setRefreshing(false);
             }
         });
+        setHasOptionsMenu(true);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
+
+        /*      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    v.removeOnLayoutChangeListener(this);
+                }
+            });
+        }*/
+
         return view;
     }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.options_menu_recipe_list, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+        mSearchItem = menu.findItem(R.id.options_search);
+        mSearchView = (SearchView) mSearchItem.getActionView();
+        if (mSearchView != null) {
+            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    onQueryTextChange(query);
+                    hideKeyboard(getActivity());
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    recyclerViewAdapter.getFilter().filter(newText);
+                    return true;
+                }
+            });
+        }
+        final SwipeRefreshLayout srl = getView().findViewById(R.id.refresh_list);
+        mSearchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                animateSearchToolbar(1, true, true);
+                srl.setEnabled(false);
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                if (menuItem.isActionViewExpanded()) {
+                    animateSearchToolbar(1, false, false);
+                    srl.setEnabled(true);
+                }
+                return true;
+            }
+        });
+    }
+
 
     @Override
     public void onStart() {
@@ -212,6 +291,13 @@ public class RecipesFragment extends Fragment {
         outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
         outState.putInt(SORT_TYPE, sortType);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mSearchItem != null)
+            mSearchItem.collapseActionView();
     }
 
     @Override
@@ -260,7 +346,7 @@ public class RecipesFragment extends Fragment {
             else
                 break;
         }
-        progressBar.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
     }
 
     Recipe readRecipe(int id) {
@@ -327,7 +413,7 @@ public class RecipesFragment extends Fragment {
                 sortSpinner.setSelection(sortType);
                 recyclerViewAdapter.sort(sortType);
             }
-            progressBar.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.GONE);
 
             writeRecipeList();
         }
@@ -390,5 +476,91 @@ public class RecipesFragment extends Fragment {
         }
 
         return false;
+    }
+
+    public void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean show) {
+        mToolbar.setBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.white));
+        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.quantum_grey_600));
+
+        if (show) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                int width = mToolbar.getWidth() -
+                        (containsOverflow ? getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
+                        ((getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
+                Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(mToolbar,
+                        isRtl(getResources()) ? mToolbar.getWidth() - width : width, mToolbar.getHeight() / 2, 0.0f, (float) width);
+                createCircularReveal.setDuration(250);
+                createCircularReveal.start();
+            } else {
+                TranslateAnimation translateAnimation = new TranslateAnimation(0.0f, 0.0f, (float) (-mToolbar.getHeight()), 0.0f);
+                translateAnimation.setDuration(220);
+                mToolbar.clearAnimation();
+                mToolbar.startAnimation(translateAnimation);
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                int width = mToolbar.getWidth() -
+                        (containsOverflow ? getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_overflow_material) : 0) -
+                        ((getResources().getDimensionPixelSize(R.dimen.abc_action_button_min_width_material) * numberOfMenuIcon) / 2);
+                Animator createCircularReveal = ViewAnimationUtils.createCircularReveal(mToolbar,
+                        isRtl(getResources()) ? mToolbar.getWidth() - width : width, mToolbar.getHeight() / 2, (float) width, 0.0f);
+                createCircularReveal.setDuration(250);
+                createCircularReveal.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mToolbar.setBackgroundColor(getThemeColor(getActivity(), R.color.colorPrimary));
+                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+                    }
+                });
+                createCircularReveal.start();
+            } else {
+                AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+                Animation translateAnimation = new TranslateAnimation(0.0f, 0.0f, 0.0f, (float) (-mToolbar.getHeight()));
+                AnimationSet animationSet = new AnimationSet(true);
+                animationSet.addAnimation(alphaAnimation);
+                animationSet.addAnimation(translateAnimation);
+                animationSet.setDuration(220);
+                animationSet.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                mToolbar.startAnimation(animationSet);
+            }
+            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+        }
+    }
+
+    private boolean isRtl(Resources resources) {
+        return resources.getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+    }
+
+    private static int getThemeColor(Context context, int id) {
+        Resources.Theme theme = context.getTheme();
+        TypedArray a = theme.obtainStyledAttributes(new int[]{id});
+        int result = a.getColor(0, 0);
+        a.recycle();
+        return result;
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        View f = activity.getCurrentFocus();
+        if (null != f && null != f.getWindowToken() && EditText.class.isAssignableFrom(f.getClass()))
+            imm.hideSoftInputFromWindow(f.getWindowToken(), 0);
+        else
+            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 }
