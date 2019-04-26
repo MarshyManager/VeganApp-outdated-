@@ -11,6 +11,11 @@
         android:icon="@drawable/favourite_recipes"
         android:title="@string/title_fav_recipes"/>
 
+    <item
+        android:id="@+id/navigation_pick_recipe"
+        android:icon="@drawable/add"
+        android:title="@string/pick_a_recipe"/>
+
     <!--<item-->
         <!--android:id="@+id/navigation_map"-->
         <!--android:icon="@drawable/map"-->
