@@ -13,11 +13,4 @@
         android:textColor="@color/black"
         android:layout_margin="@dimen/text_margin" />
 
-    <ImageView
-        android:id="@+id/clear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/clear"
-        tools:ignore="ContentDescription" />
-
 </RelativeLayout>

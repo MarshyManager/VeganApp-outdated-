@@ -248,6 +248,7 @@ public class MyRecipeRecyclerViewAdapter extends RecyclerView.Adapter<MyRecipeRe
                     } else {
                         Picasso.with(view.getContext()).load(R.drawable.like).into(holder.mDishRating);
                     }
+                    YoYo.with(Techniques.Pulse).delay(0).duration(600).playOn(holder.mDishRating);
                     holder.mRateNum.setText(StringFormatter.formStringValueFromInt(holder.recipe.getRate()));
                 }
             }
