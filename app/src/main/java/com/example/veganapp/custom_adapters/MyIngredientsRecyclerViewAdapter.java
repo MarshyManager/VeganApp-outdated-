@@ -55,19 +55,12 @@ public class MyIngredientsRecyclerViewAdapter extends RecyclerView.Adapter<MyIng
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;
-        public final TextView mContentView;
         public Ingredient ingredient;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.item_number);
-            mContentView = (TextView) view.findViewById(R.id.content);
-        }
-
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            mIdView = view.findViewById(R.id.ingredient_name_search);
         }
     }
 }

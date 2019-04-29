@@ -1,7 +1,6 @@
 package com.example.veganapp.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,11 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.ListView;
 
 import com.example.veganapp.R;
+import com.example.veganapp.custom_adapters.IngredientAdapter;
 import com.example.veganapp.custom_adapters.MyIngredientsRecyclerViewAdapter;
 import com.example.veganapp.db_classes.Ingredient;
 import com.example.veganapp.db_classes.Recipe;
@@ -33,7 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -44,8 +41,8 @@ public class RecipeByIngredientFragment extends Fragment {
     protected HashSet<String> uniqueIngredients;
     protected Toolbar mToolbar;
     protected String path;
-    ListView listView;
-    ArrayAdapter<String> arrayAdapter;
+    RecyclerView recyclerView;
+    IngredientAdapter ingredientAdapter;
 
 
     public RecipeByIngredientFragment() {
@@ -82,7 +79,8 @@ public class RecipeByIngredientFragment extends Fragment {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             recyclerView.setAdapter(new MyIngredientsRecyclerViewAdapter());
         }
-        arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, uniqueIngredients.toArray());
+        List<String> ingredientList = new ArrayList<>(uniqueIngredients);
+        ingredientAdapter = new IngredientAdapter(ingredientList);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
@@ -100,8 +98,8 @@ public class RecipeByIngredientFragment extends Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View view = inflater.inflate(R.layout.ingredient_dialog, null);
-                listView = view.findViewById(R.id.ingredients_adapter);
-                listView.setAdapter(arrayAdapter);
+                recyclerView = view.findViewById(R.id.ingredients_search_adapter);
+                recyclerView.setAdapter(ingredientAdapter);
                 builder.setView(view).show();
                 return true;
             }
