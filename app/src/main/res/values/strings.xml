@@ -24,5 +24,7 @@
     <string name="email">Email</string>
     <string name="search">Search...</string>
     <string name="pick_a_recipe">Pick a recipe</string>
+    <string name="results">Results</string>
+    <string name="hide">Hide</string>
 
 </resources>

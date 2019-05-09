@@ -10,7 +10,6 @@
         android:id="@+id/appbar_ingredient"
         android:layout_width="match_parent"
         android:layout_height="56dp">
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_ingredient"
             android:layout_width="match_parent"
@@ -25,6 +24,18 @@
                 android:gravity="center|start"
                 android:text="@string/add_ingredient" />
 
+            <Button
+                android:id="@+id/find_recipes"
+                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:background="@drawable/button_find_background"
+                android:text="Find"
+                android:textSize="20dp"
+                android:textColor="@color/black"
+                android:layout_gravity="center|end"
+                android:clickable="true"
+                android:enabled="false" />
+
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -37,5 +48,5 @@
         android:layout_below="@+id/appbar_ingredient"
         android:layout_marginLeft="0dp"
         android:layout_marginRight="0dp"
-        tools:listitem="@layout/fragment_ingridient" />
+        tools:listitem="@layout/fragment_ingridient_item" />
 </RelativeLayout>

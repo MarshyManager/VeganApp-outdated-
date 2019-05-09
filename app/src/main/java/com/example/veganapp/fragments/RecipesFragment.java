@@ -2,7 +2,6 @@ package com.example.veganapp.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -45,7 +44,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.veganapp.custom_adapters.MyRecipeRecyclerViewAdapter;
+import com.example.veganapp.activities.MainActivity;
+import com.example.veganapp.custom_adapters.RecipeRecyclerViewAdapter;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.support_classes.LikeValueChanged;
@@ -89,7 +89,7 @@ public class RecipesFragment extends Fragment {
     protected Spinner sortSpinner;
     protected ProgressBar mProgressBar;
     protected boolean filter;
-    protected MyRecipeRecyclerViewAdapter recyclerViewAdapter;
+    protected RecipeRecyclerViewAdapter recyclerViewAdapter;
     protected String[] sortParams;
     protected int sortType;
     protected String path;
@@ -97,7 +97,7 @@ public class RecipesFragment extends Fragment {
     FirebaseDatabase db;
     protected Toolbar mToolbar;
     protected SearchView mSearchView;
-    public MenuItem mSearchItem;
+    private MenuItem mSearchItem;
 
     public RecipesFragment() {
     }
@@ -131,7 +131,7 @@ public class RecipesFragment extends Fragment {
 
         path = getActivity().getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
 
-        recyclerViewAdapter = new MyRecipeRecyclerViewAdapter(shp, mListener, mLikeListener, this, filter);
+        recyclerViewAdapter = new RecipeRecyclerViewAdapter(shp, mListener, mLikeListener, this, filter);
 
         if (isOnline) {
             db = FirebaseDatabase.getInstance();
@@ -228,7 +228,7 @@ public class RecipesFragment extends Fragment {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
                     onQueryTextChange(query);
-                    hideKeyboard(getActivity());
+                    MainActivity.hideKeyboard(getActivity());
                     return true;
                 }
 
@@ -276,7 +276,7 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnRecipeLikeFragmentInteractionListener) {
+        if ((context instanceof OnRecipeListFragmentInteractionListener) && (context instanceof OnRecipeLikeFragmentInteractionListener)) {
             mListener = (OnRecipeListFragmentInteractionListener) context;
             mLikeListener = (OnRecipeLikeFragmentInteractionListener) context;
         } else {
@@ -553,14 +553,5 @@ public class RecipesFragment extends Fragment {
         int result = a.getColor(0, 0);
         a.recycle();
         return result;
-    }
-
-    public static void hideKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        View f = activity.getCurrentFocus();
-        if (null != f && null != f.getWindowToken() && EditText.class.isAssignableFrom(f.getClass()))
-            imm.hideSoftInputFromWindow(f.getWindowToken(), 0);
-        else
-            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 }

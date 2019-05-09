@@ -17,8 +17,8 @@
         android:title="@string/pick_a_recipe"/>
 
     <!--<item-->
-        <!--android:id="@+id/navigation_map"-->
-        <!--android:icon="@drawable/map"-->
-        <!--android:title="@string/map"/>-->
+    <!--android:id="@+id/navigation_map"-->
+    <!--android:icon="@drawable/map"-->
+    <!--android:title="@string/map"/>-->
 
 </menu>

@@ -25,12 +25,10 @@ public class CookInstructionFragment extends Fragment {
     protected static final String SHARED_PREFERENCES = "shared_preferences";
 
     protected Recipe recipe;
-    protected TextView mNameView;
     protected TextView mRateNum;
     protected TextView mViewsNum;
     protected TextView mRecipeText;
     protected TextView mIngredientsText;
-    protected TextView mIngestionText;
     protected RatingBar mComplexity;
     protected ImageView mDishImage;
     protected ImageView mRateImage;
