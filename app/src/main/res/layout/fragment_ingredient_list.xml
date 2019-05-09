@@ -10,6 +10,7 @@
         android:id="@+id/appbar_ingredient"
         android:layout_width="match_parent"
         android:layout_height="56dp">
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_ingredient"
             android:layout_width="match_parent"
@@ -19,22 +20,23 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:textSize="20dp"
                 android:layout_marginStart="10dp"
                 android:gravity="center|start"
-                android:text="@string/add_ingredient" />
+                android:text="@string/add_ingredient"
+                android:textSize="20sp" />
 
             <Button
                 android:id="@+id/find_recipes"
-                android:layout_height="wrap_content"
                 android:layout_width="100dp"
-                android:background="@drawable/button_find_background"
-                android:text="Find"
-                android:textSize="20dp"
-                android:textColor="@color/black"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center|end"
+                android:background="@drawable/button_find_background"
                 android:clickable="true"
-                android:enabled="false" />
+                android:enabled="false"
+                android:focusable="true"
+                android:text="@string/find"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
 
         </androidx.appcompat.widget.Toolbar>
 

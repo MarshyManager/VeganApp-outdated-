@@ -11,6 +11,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.example.veganapp.fragments.CookInstructionFragment;
+import com.example.veganapp.fragments.DailyMenuFragment;
 import com.example.veganapp.fragments.RecipeByIngredientFragment;
 import com.example.veganapp.support_classes.LikeValueChanged;
 import com.example.veganapp.support_classes.ViewsValueChanged;
@@ -87,6 +88,11 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                     RecipeByIngredientFragment rbiFragment = RecipeByIngredientFragment.newInstance(recipesPath);
                     progressBar.setVisibility(View.GONE);
                     ftrans.replace(R.id.fragment_container, rbiFragment).commit();
+                    return true;
+                case R.id.navigation_create_menu:
+                    DailyMenuFragment dailyMenuFragment = DailyMenuFragment.newInstance();
+                    progressBar.setVisibility(View.GONE);
+                    ftrans.replace(R.id.fragment_container, dailyMenuFragment).commit();
                     return true;
 //                case R.id.navigation_map:
 //                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
