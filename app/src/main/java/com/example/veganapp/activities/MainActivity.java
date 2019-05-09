@@ -2,35 +2,35 @@ package com.example.veganapp.activities;
 
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.example.veganapp.db_classes.Ingredient;
+import com.example.veganapp.fragments.CookInstructionFragment;
 import com.example.veganapp.fragments.RecipeByIngredientFragment;
 import com.example.veganapp.support_classes.LikeValueChanged;
 import com.example.veganapp.support_classes.ViewsValueChanged;
-import com.google.android.gms.tasks.OnCanceledListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.db_classes.Restaurant;
 
-import com.example.veganapp.fragments.CookInstructionFragment;
 import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 
@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     static final String APP_PREFERENCES = "settings";
     static final String RECIPES = "recipes";
     static final String FULL_RECIPE = "full_recipe";
+    static final String FOUNDED_RECIPES = "founded_recipes";
     protected static final String RECIPES_SER = "/recipes_ser";
 
     protected List<Recipe> recipes;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             fm = getSupportFragmentManager();
             progressBar.setVisibility(View.VISIBLE);
             fm.popBackStack(FULL_RECIPE, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            fm.popBackStack(FOUNDED_RECIPES, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             ftrans = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_recipe_list:
@@ -177,6 +179,15 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         mDB.getReference(RECIPES + "/" + String.valueOf(item.getId()) + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, shp));
     }
 
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        View f = activity.getCurrentFocus();
+        if (null != f && null != f.getWindowToken() && EditText.class.isAssignableFrom(f.getClass()))
+            imm.hideSoftInputFromWindow(f.getWindowToken(), 0);
+        else
+            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
     @Override
     public void onBackPressed() {
         if ((navigation.getSelectedItemId() != R.id.navigation_recipe_list)
@@ -189,6 +200,10 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    public SharedPreferences getShp() {
+        return shp;
     }
 }
 

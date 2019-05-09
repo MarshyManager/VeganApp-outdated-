@@ -6,8 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,11 +19,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.veganapp.R;
-import com.example.veganapp.custom_adapters.IngredientAdapter;
-import com.example.veganapp.custom_adapters.MyIngredientsRecyclerViewAdapter;
+import com.example.veganapp.custom_adapters.IngredientsDialogAdapter;
+import com.example.veganapp.custom_adapters.ChosenIngredientsAdapter;
 import com.example.veganapp.db_classes.Ingredient;
 import com.example.veganapp.db_classes.Recipe;
 
@@ -31,19 +35,26 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class RecipeByIngredientFragment extends Fragment {
 
+    final static String FOUNDED_RECIPES = "founded_recipes";
+
     protected List<Recipe> recipes;
-    protected HashSet<String> uniqueIngredients;
+    protected Set<Ingredient> uniqueIngredients;
     protected Toolbar mToolbar;
     protected String path;
-    RecyclerView recyclerView;
-    IngredientAdapter ingredientAdapter;
-
+    RecyclerView recyclerViewDialog;
+    RecyclerView recyclerViewChosen;
+    IngredientsDialogAdapter ingredientsDialogAdapter;
+    ChosenIngredientsAdapter chosenIngredientsAdapter;
+    Button findRecipes;
+    TextView hideDialog;
 
     public RecipeByIngredientFragment() {
     }
@@ -63,7 +74,7 @@ public class RecipeByIngredientFragment extends Fragment {
         recipes = new ArrayList<>();
         uniqueIngredients = new HashSet<>();
         readRecipeList();
-        chooseIngredients();
+        getUniqueIngredients();
     }
 
     @Override
@@ -71,19 +82,24 @@ public class RecipeByIngredientFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ingredient_list, container, false);
         mToolbar = view.findViewById(R.id.toolbar_ingredient);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new MyIngredientsRecyclerViewAdapter());
-        }
-        List<String> ingredientList = new ArrayList<>(uniqueIngredients);
-        ingredientAdapter = new IngredientAdapter(ingredientList);
+        findRecipes = view.findViewById(R.id.find_recipes);
+        Context context = view.getContext();
+        recyclerViewChosen = view.findViewById(R.id.ingredient_list);
+        recyclerViewChosen.setLayoutManager(new LinearLayoutManager(context));
+        chosenIngredientsAdapter = new ChosenIngredientsAdapter(findRecipes);
+        recyclerViewChosen.setAdapter(chosenIngredientsAdapter);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
+
+        findRecipes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction ftrans = getActivity().getSupportFragmentManager().beginTransaction();
+                FoundedRecipesFragment frf = FoundedRecipesFragment.newInstance(chosenIngredientsAdapter.getIngredients());
+                ftrans.replace(R.id.fragment_container, frf).addToBackStack(FOUNDED_RECIPES).commit();
+            }
+        });
         return view;
     }
 
@@ -98,9 +114,50 @@ public class RecipeByIngredientFragment extends Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 View view = inflater.inflate(R.layout.ingredient_dialog, null);
-                recyclerView = view.findViewById(R.id.ingredients_search_adapter);
-                recyclerView.setAdapter(ingredientAdapter);
-                builder.setView(view).show();
+                List<Ingredient> ingredientList = new ArrayList<>(uniqueIngredients);
+                Collections.sort(ingredientList, new Comparator<Ingredient>() {
+                    @Override
+                    public int compare(Ingredient lhs, Ingredient rhs) {
+                        return lhs.getName().compareTo(rhs.getName());
+                    }
+                });
+                ingredientsDialogAdapter = new IngredientsDialogAdapter(ingredientList, (ChosenIngredientsAdapter) recyclerViewChosen.getAdapter(), findRecipes);
+                recyclerViewDialog = view.findViewById(R.id.ingredients_search_adapter);
+                hideDialog = view.findViewById(R.id.hide_dialog);
+                recyclerViewDialog.setLayoutManager(new LinearLayoutManager(view.getContext()));
+                recyclerViewDialog.setAdapter(ingredientsDialogAdapter);
+                SearchView mSearchView = view.findViewById(R.id.search_ingredients);
+                if (mSearchView != null) {
+                    mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override
+                        public boolean onQueryTextSubmit(String query) {
+                            onQueryTextChange(query);
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String newText) {
+                            ingredientsDialogAdapter.getFilter().filter(newText);
+                            return true;
+                        }
+                    });
+                    mSearchView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ((SearchView) v).setIconified(false);
+                        }
+                    });
+                }
+                final AlertDialog alertDialog = builder.setView(view).create();
+                alertDialog.show();
+                hideDialog.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alertDialog.dismiss();
+                    }
+                });
                 return true;
             }
         });
@@ -117,10 +174,10 @@ public class RecipeByIngredientFragment extends Fragment {
         super.onDetach();
     }
 
-    void chooseIngredients() {
+    void getUniqueIngredients() {
         for (Recipe recipe : recipes) {
             for (Ingredient ingredient : recipe.getIngredients()) {
-                uniqueIngredients.add(ingredient.getName());
+                uniqueIngredients.add(ingredient);
             }
         }
     }
