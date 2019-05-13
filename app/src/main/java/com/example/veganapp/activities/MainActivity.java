@@ -36,6 +36,12 @@ import com.example.veganapp.db_classes.Restaurant;
 import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                     mProgressBar.setVisibility(View.GONE);
                     ftrans.replace(R.id.fragment_container, rbiFragment).commit();
                     return true;
+
                 case R.id.navigation_create_menu:
                     DailyMenuFragment dailyMenuFragment = DailyMenuFragment.newInstance();
                     mProgressBar.setVisibility(View.GONE);
@@ -107,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         setContentView(R.layout.activity_main);
 
         recipesPath = getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
+
         Places.initialize(getApplicationContext(), "AIzaSyCQ_4795C2OlIunuSiI7ku224GWfAVzIcY");
 
         shp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
@@ -125,11 +133,13 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                 }
             }
 
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
+
 
         recipes = new ArrayList<>();
         restaurants = new ArrayList<>();

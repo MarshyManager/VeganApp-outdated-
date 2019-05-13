@@ -24,7 +24,6 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
     private ChosenIngredientsAdapter chosenIngredientsAdapter;
     private final Button findRecipes;
 
-
     public IngredientsDialogAdapter(List<Ingredient> ingredients, ChosenIngredientsAdapter chosenIngredientsAdapter, Button findRecipes) {
         this.ingredients = ingredients;
         this.ingredientsFiltered = ingredients;

@@ -83,10 +83,7 @@
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/abc_searchview_description_clear"
-                android:focusable="true"
-
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp" />
+                android:focusable="true" />
         </LinearLayout>
 
         <LinearLayout

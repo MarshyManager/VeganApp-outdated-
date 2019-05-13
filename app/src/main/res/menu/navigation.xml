@@ -20,6 +20,7 @@
         android:id="@+id/navigation_create_menu"
         android:icon="@drawable/cook_book"
         android:title="@string/create_menu" />
+
     <item
         android:id="@+id/navigation_map"
         android:icon="@drawable/map"
