@@ -21,7 +21,7 @@ public class MenuPagerAdapter extends PagerAdapter {
     List<Recipe> recipes;
     LayoutInflater inflater;
 
-    public MenuPagerAdapter(List<Recipe> recipes, LayoutInflater inflater){
+    public MenuPagerAdapter(List<Recipe> recipes, LayoutInflater inflater) {
         this.recipes = recipes;
         this.inflater = inflater;
     }
@@ -29,11 +29,11 @@ public class MenuPagerAdapter extends PagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        return  recipes.get(position).getIngestion();
+        return recipes.get(position).getIngestion();
     }
 
     @Override
-    public int getCount(){
+    public int getCount() {
         return recipes.size();
     }
 
@@ -58,6 +58,6 @@ public class MenuPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        container.removeView((View)object);
+        container.removeView((View) object);
     }
 }

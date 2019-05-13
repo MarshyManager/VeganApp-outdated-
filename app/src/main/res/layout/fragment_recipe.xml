@@ -53,7 +53,7 @@
         android:id="@+id/view_foreground"
         android:layout_width="match_parent"
         android:layout_height="120dp"
-        android:background="#FF00ffff"
+        android:background="@color/cards_and_dialogs_color"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView

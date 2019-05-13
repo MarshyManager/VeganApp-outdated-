@@ -11,15 +11,15 @@
     <item
         android:id="@+id/options_settings"
         android:icon="@drawable/settings"
-        android:title="@string/settings"/>
+        android:title="@string/settings" />
 
     <item
         android:id="@+id/options_bug_rep"
         android:icon="@drawable/bug_report"
-        android:title="@string/bug_report"/>
+        android:title="@string/bug_report" />
 
     <item
         android:id="@+id/options_email"
         android:icon="@drawable/mail"
-        android:title="@string/email"/>
+        android:title="@string/email" />
 </menu>

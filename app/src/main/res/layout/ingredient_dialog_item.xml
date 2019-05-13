@@ -3,17 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:clickable="true"
     android:background="@drawable/ingredient_dialog_item_background"
+    android:clickable="true"
+    android:orientation="horizontal"
     tools:ignore="KeyboardInaccessibleWidget">
 
     <TextView
         android:id="@+id/ingredient_name_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:layout_margin="@dimen/text_margin"
         android:textColor="@color/black"
-        android:layout_margin="@dimen/text_margin" />
+        android:textSize="20sp" />
 
 </RelativeLayout>

@@ -20,8 +20,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="center|start"
                 android:layout_marginStart="10dp"
-                android:gravity="center|start"
+                android:gravity="center_vertical"
                 android:text="@string/add_ingredient"
                 android:textSize="20sp" />
 
@@ -44,11 +45,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/ingredient_list"
-        android:name="com.example.veganapp.fragments.RecipeByIngridientFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/appbar_ingredient"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
         tools:listitem="@layout/fragment_ingridient_item" />
 </RelativeLayout>

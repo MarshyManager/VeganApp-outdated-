@@ -29,5 +29,6 @@
     <string name="create_menu">Create Menu</string>
     <string name="see_more">See more...</string>
     <string name="find">Find</string>
+    <string name="map_not_ready">Map not ready</string>
 
 </resources>

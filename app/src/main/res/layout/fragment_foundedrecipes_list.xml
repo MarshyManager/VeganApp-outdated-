@@ -11,13 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="56dp">
 
-            <TextView
-                android:id="@+id/founded_recipes_title"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/results"
-                android:layout_marginStart="10dp"
-                android:gravity="center|start" />
+        <TextView
+            android:id="@+id/founded_recipes_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:gravity="center|start"
+            android:text="@string/results" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -25,8 +25,8 @@
         android:name="com.example.veganapp.fragments.FoundedRecipesFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/appbar_founded_recipes"
         tools:context=".fragments.FoundedRecipesFragment"
-        tools:listitem="@layout/fragment_recipe"
-        android:layout_below="@id/appbar_founded_recipes"/>
+        tools:listitem="@layout/fragment_recipe" />
 
 </RelativeLayout>

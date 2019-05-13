@@ -18,8 +18,8 @@ import com.example.veganapp.R;
 import com.example.veganapp.custom_adapters.MenuPagerAdapter;
 import com.example.veganapp.db_classes.Recipe;
 import com.squareup.picasso.Picasso;
-import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,13 +92,13 @@ public class DailyMenuFragment extends RecipesFragment {
                         }
                         menuPagerAdapter = new MenuPagerAdapter(recipes, inflater);
                         viewPager.setAdapter(menuPagerAdapter);
+                        dotsIndicator.setViewPager(viewPager);
                     }
 
                 });
                 b.show();
             }
         });
-        dotsIndicator.setViewPager(viewPager);
         return view;
     }
 

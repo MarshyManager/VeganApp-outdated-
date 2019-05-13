@@ -15,14 +15,16 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_ingredient"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_alignTop="@+id/appbar_menu">
 
             <TextView
                 android:id="@+id/daily_menu_title"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:layout_gravity="center|start"
                 android:layout_marginStart="10dp"
-                android:gravity="center|start"
+                android:gravity="center_vertical"
                 android:text="@string/results"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
@@ -31,11 +33,12 @@
                 android:id="@+id/create_menu_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center|end"
                 android:layout_marginEnd="10dp"
                 android:background="@drawable/button_find_background"
                 android:clickable="true"
                 android:focusable="true"
-                android:gravity="center|end"
+                android:padding="5dp"
                 android:text="@string/create_menu"
                 android:textColor="@color/black"
                 android:textSize="20sp" />

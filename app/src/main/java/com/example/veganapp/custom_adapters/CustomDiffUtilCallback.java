@@ -12,8 +12,7 @@ public class CustomDiffUtilCallback extends DiffUtil.Callback {
     private List<Recipe> oldList;
     private List<Recipe> newList;
 
-    public CustomDiffUtilCallback(List<Recipe> oldList, List<Recipe> newList)
-    {
+    public CustomDiffUtilCallback(List<Recipe> oldList, List<Recipe> newList) {
         this.oldList = oldList;
         this.newList = newList;
     }
