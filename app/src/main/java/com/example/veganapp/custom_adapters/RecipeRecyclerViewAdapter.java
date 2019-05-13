@@ -93,7 +93,7 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
         notifyItemRemoved(pos);
     }
 
-    public void clear(){
+    public void clear() {
         recipes.clear();
         recipesFiltered.clear();
         notifyDataSetChanged();

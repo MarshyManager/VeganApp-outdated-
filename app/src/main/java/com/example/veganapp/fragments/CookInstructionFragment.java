@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,8 +57,7 @@ public class CookInstructionFragment extends Fragment {
         if (savedInstanceState != null) {
             recipe = (Recipe) savedInstanceState.getSerializable(RECIPE);
             shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
-        }
-        else if (getArguments() != null) {
+        } else if (getArguments() != null) {
             shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
         }
     }
@@ -110,14 +110,14 @@ public class CookInstructionFragment extends Fragment {
             public void onClick(View view) {
                 if (null != mLikeListener) {
                     mLikeListener.onRecipeLikeFragmentInteraction(recipe);
-                        if (shp.getBoolean("recipe_offline_like_" + recipe.getId(), false)) {
-                            Picasso.with(view.getContext()).load(R.drawable.like_activ).into(mRateImage);
-                            mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
-                        } else {
-                            Picasso.with(view.getContext()).load(R.drawable.like).into(mRateImage);
-                            mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
-                        }
-                        parentFragment.writeRecipeList();
+                    if (shp.getBoolean("recipe_offline_like_" + recipe.getId(), false)) {
+                        Picasso.with(view.getContext()).load(R.drawable.like_activ).into(mRateImage);
+                        mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
+                    } else {
+                        Picasso.with(view.getContext()).load(R.drawable.like).into(mRateImage);
+                        mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
+                    }
+                    parentFragment.writeRecipeList();
                 }
             }
         });

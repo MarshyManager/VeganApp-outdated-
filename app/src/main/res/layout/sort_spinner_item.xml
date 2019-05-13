@@ -10,16 +10,16 @@
         android:id="@+id/sort_param_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        tools:text="@string/s1"
-        android:textSize="20sp"
+        android:layout_centerVertical="true"
         android:textColor="@color/black"
-        android:layout_centerVertical="true" />
+        android:textSize="20sp"
+        tools:text="@string/s1" />
 
     <ImageView
         android:id="@+id/sort_type"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        tools:ignore="ContentDescription"
-        android:layout_alignParentEnd="true"/>
+        android:layout_alignParentEnd="true"
+        tools:ignore="ContentDescription" />
 
 </RelativeLayout>

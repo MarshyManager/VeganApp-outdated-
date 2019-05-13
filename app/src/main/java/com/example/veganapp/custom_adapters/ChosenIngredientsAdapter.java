@@ -66,7 +66,7 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
         }
         if (ingredients.size() == 0)
             findRecipes.setEnabled(false);
-}
+    }
 
     public void removeAt(int pos) {
         ingredients.remove(pos);

@@ -14,6 +14,7 @@ import com.example.veganapp.fragments.CookInstructionFragment;
 import com.example.veganapp.fragments.RecipeByIngredientFragment;
 import com.example.veganapp.support_classes.LikeValueChanged;
 import com.example.veganapp.support_classes.ViewsValueChanged;
+import com.google.android.libraries.places.api.Places;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,18 +35,21 @@ import com.example.veganapp.db_classes.Restaurant;
 import com.example.veganapp.fragments.MapFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.yandex.mapkit.MapKitFactory;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements RecipesFragment.OnRecipeListFragmentInteractionListener,
-        RecipesFragment.OnRecipeLikeFragmentInteractionListener, MapFragment.OnFragmentInteractionListener {
+        RecipesFragment.OnRecipeLikeFragmentInteractionListener {
 
     static final String APP_PREFERENCES = "settings";
     static final String RECIPES = "recipes";
+    static final String RESTAURANTS = "restaurants";
     static final String FULL_RECIPE = "full_recipe";
     static final String FOUNDED_RECIPES = "founded_recipes";
     protected static final String RECIPES_SER = "/recipes_ser";
@@ -58,8 +62,9 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     protected SharedPreferences shp;
 
     protected DatabaseReference DBRecipes;
+    protected DatabaseReference DBRestaurants;
 
-    protected ProgressBar progressBar;
+    protected ProgressBar mProgressBar;
     protected BottomNavigationView navigation;
     protected String recipesPath;
 
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             RecipesFragment recipesFragment;
             fm = getSupportFragmentManager();
-            progressBar.setVisibility(View.VISIBLE);
+            mProgressBar.setVisibility(View.VISIBLE);
             fm.popBackStack(FULL_RECIPE, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             fm.popBackStack(FOUNDED_RECIPES, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             ftrans = fm.beginTransaction();
@@ -85,14 +90,27 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
                     return true;
                 case R.id.navigation_pick_recipe:
                     RecipeByIngredientFragment rbiFragment = RecipeByIngredientFragment.newInstance(recipesPath);
-                    progressBar.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.GONE);
                     ftrans.replace(R.id.fragment_container, rbiFragment).commit();
                     return true;
+<<<<<<< Updated upstream
 //                case R.id.navigation_map:
 //                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
 //                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
 //                    mProgressBar.setVisibility(View.GONE);
 //                    return true;
+=======
+                case R.id.navigation_create_menu:
+                    DailyMenuFragment dailyMenuFragment = DailyMenuFragment.newInstance();
+                    mProgressBar.setVisibility(View.GONE);
+                    ftrans.replace(R.id.fragment_container, dailyMenuFragment).commit();
+                    return true;
+                case R.id.navigation_map:
+                    MapFragment mapFragment = MapFragment.newInstance(restaurants);
+                    ftrans.replace(R.id.fragment_container, mapFragment).commit();
+                    mProgressBar.setVisibility(View.GONE);
+                    return true;
+>>>>>>> Stashed changes
             }
             return false;
         }
@@ -104,17 +122,31 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
         setContentView(R.layout.activity_main);
 
         recipesPath = getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
-        MapKitFactory.setApiKey("e85d69c5-1f52-4e55-863a-418618587a97");
-        MapKitFactory.initialize(this);
+
+        Places.initialize(getApplicationContext(), "AIzaSyCQ_4795C2OlIunuSiI7ku224GWfAVzIcY");
 
         shp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
 
-        progressBar = findViewById(R.id.load_data);
+        mProgressBar = findViewById(R.id.load_data);
 
         mDB = FirebaseDatabase.getInstance();
         DBRecipes = mDB.getReference(RECIPES);
+        DBRestaurants = mDB.getReference(RESTAURANTS);
 
-//        DatabaseReference DBRestaurants = mDB.getReference(RESTAURANTS);
+        DBRestaurants.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot unit : dataSnapshot.getChildren()) {
+                    restaurants.add(unit.getValue(Restaurant.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
 
         recipes = new ArrayList<>();
         restaurants = new ArrayList<>();
@@ -139,13 +171,11 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
     @Override
     protected void onStart() {
         super.onStart();
-        MapKitFactory.getInstance().onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        MapKitFactory.getInstance().onStop();
     }
 
     @Override
@@ -195,11 +225,6 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.O
             navigation.setSelectedItemId(R.id.navigation_recipe_list);
         else
             super.onBackPressed();
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     public SharedPreferences getShp() {
