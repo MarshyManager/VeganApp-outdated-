@@ -18,8 +18,9 @@ import android.widget.TextView;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.example.veganapp.support_classes.StringFormatter;
-import com.google.android.material.appbar.SubtitleCollapsingToolbarLayout;
 import com.squareup.picasso.Picasso;
+
+import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
 
 public class CookInstructionFragment extends Fragment {
 
@@ -77,14 +78,15 @@ public class CookInstructionFragment extends Fragment {
         mDishImage = v.findViewById(R.id.instr_image);
         mRateImage = v.findViewById(R.id.instr_rate);
         Toolbar toolbar = v.findViewById(R.id.cook_instruction_toolbar);
-        SubtitleCollapsingToolbarLayout sctl = v.findViewById(R.id.cook_instruction_toolbar_layout);
+        CollapsingToolbarLayout ctl = v.findViewById(R.id.cook_instruction_toolbar_layout);
 
-        sctl.setTitle(recipe.getName());
-        sctl.setSubtitle(recipe.getIngestion());
-        sctl.setExpandedTitleTextAppearance(R.style.ExpandedTitleStyle);
-        sctl.setExpandedSubtitleTextAppearance(R.style.ExpandedSubTitleStyle);
-        sctl.setCollapsedTitleTextAppearance(R.style.CollapsedTitleStyle);
-        sctl.setCollapsedSubtitleTextAppearance(R.style.CollapsedSubTitleStyle);
+//        sctl.setTitle(recipe.getName());
+//        sctl.setSubtitle(recipe.getIngestion());
+//        sctl.setExpandedTitleTextAppearance(R.style.ExpandedTitleStyle);
+//        sctl.setExpandedSubtitleTextAppearance(R.style.ExpandedSubTitleStyle);
+//        sctl.setCollapsedTitleTextAppearance(R.style.CollapsedTitleStyle);
+//        sctl.setCollapsedSubtitleTextAppearance(R.style.CollapsedSubTitleStyle);
+        ctl.setTitle(recipe.getName());
         mComplexity.setRating(recipe.getComplexity().floatValue());
         mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
         mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));

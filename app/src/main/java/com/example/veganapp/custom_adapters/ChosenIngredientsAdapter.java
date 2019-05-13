@@ -93,7 +93,7 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.ingredient = ingredients.get(position);
         if (addTypeList.get(position))
-            holder.mView.setBackgroundResource(R.color.colorPrimaryDark);
+            holder.mView.setBackgroundResource(R.color.color_primary_dark);
         else
             holder.mView.setBackgroundResource(R.color.red);
         holder.mNameView.setText(ingredients.get(position).getName());

@@ -121,15 +121,17 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
-        <com.google.android.material.appbar.SubtitleCollapsingToolbarLayout
+        <net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout
             android:id="@+id/cook_instruction_toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:animateLayoutChanges="true"
             android:fitsSystemWindows="true"
+            app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
+            app:collapsedTitleTextAppearance="@style/CollapsedTitleStyle"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:titleEnabled="true">
+            app:collapsedTitleGravity="start">
 
             <ImageView
                 android:id="@+id/instr_image"
@@ -147,7 +149,8 @@
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="?attr/homeAsUpIndicator" />
-        </com.google.android.material.appbar.SubtitleCollapsingToolbarLayout>
+
+        </net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -15,7 +15,7 @@
             android:id="@+id/toolbar_recipe_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary">
+            android:background="@color/color_primary">
 
             <Spinner
                 android:id="@+id/sort_spinner"

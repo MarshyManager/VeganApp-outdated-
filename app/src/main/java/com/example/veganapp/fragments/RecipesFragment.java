@@ -2,7 +2,6 @@ package com.example.veganapp.fragments;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -26,15 +25,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -509,8 +505,8 @@ public class RecipesFragment extends Fragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
-                        mToolbar.setBackgroundColor(getThemeColor(getActivity(), R.color.colorPrimary));
-                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+                        mToolbar.setBackgroundColor(getThemeColor(getActivity(), R.color.color_primary));
+                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.color_primary_dark));
                     }
                 });
                 createCircularReveal.start();
@@ -529,7 +525,7 @@ public class RecipesFragment extends Fragment {
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimary));
+                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.color_primary));
                     }
 
                     @Override
@@ -539,7 +535,7 @@ public class RecipesFragment extends Fragment {
                 });
                 mToolbar.startAnimation(animationSet);
             }
-            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.color_primary_dark));
         }
     }
 

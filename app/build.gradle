@@ -49,11 +49,11 @@ dependencies {
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
     implementation 'com.daimajia.easing:library:2.0@aar'
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
-    implementation 'com.hendraanggrian.material:collapsingtoolbarlayout-subtitle:1.0.0'
     implementation 'com.github.iammert:ReadableBottomBar:0.2'
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:3.0.3'
     implementation 'com.google.android.libraries.places:places:1.1.0'
+    implementation 'net.opacapp:multiline-collapsingtoolbar:27.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

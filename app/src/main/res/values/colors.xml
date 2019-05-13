@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#B4FF6A</color>
-    <color name="colorPrimaryDark">#74EA00</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="color_primary">#B4FF6A</color>
+    <color name="color_primary_dark">#74EA00</color>
+    <color name="color_accent">#D81B60</color>
+    <color name="color_lime_green">#32CD32</color>
     <color name="black">#000000</color>
     <color name="gold">#FFD700</color>
     <color name="blue">#0000FF</color>
@@ -16,4 +17,5 @@
     <color name="active_icon_color">#8A000000</color>
     <color name="white">@android:color/white</color>
     <color name="quantum_grey_600">#757575</color>
+    <color name="gray_green">#8FBC8F</color>
 </resources>

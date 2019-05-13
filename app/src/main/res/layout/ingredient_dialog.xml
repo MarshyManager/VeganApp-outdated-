@@ -9,7 +9,7 @@
         android:id="@+id/hide_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/color_primary_dark"
         android:clickable="true"
         android:focusable="true"
         android:paddingStart="10dp"
