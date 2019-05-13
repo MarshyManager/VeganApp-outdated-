@@ -59,8 +59,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
-                android:layout_marginEnd="10dp"
                 android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
                 android:background="@null"
                 android:dropDownAnchor="@id/anchor_dropdown"
@@ -84,8 +84,9 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/abc_searchview_description_clear"
                 android:focusable="true"
-                android:paddingEnd="8dp"
-                android:paddingStart="8dp" />
+
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -102,8 +103,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/abc_searchview_description_submit"
                 android:focusable="true"
-                android:paddingEnd="8dp"
                 android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:visibility="gone" />
 
             <ImageView
@@ -114,8 +115,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/abc_searchview_description_voice"
                 android:focusable="true"
-                android:paddingEnd="8dp"
                 android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

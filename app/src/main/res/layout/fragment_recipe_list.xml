@@ -10,6 +10,7 @@
         android:id="@+id/appbar_recipe_list"
         android:layout_width="match_parent"
         android:layout_height="56dp">
+        
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_recipe_list"
             android:layout_width="match_parent"

@@ -4,21 +4,25 @@
     <item
         android:id="@+id/navigation_recipe_list"
         android:icon="@drawable/cook_book"
-        android:title="@string/title_cook_book"/>
+        android:title="@string/title_cook_book" />
 
     <item
         android:id="@+id/navigation_favourite"
         android:icon="@drawable/favourite_recipes"
-        android:title="@string/title_fav_recipes"/>
+        android:title="@string/title_fav_recipes" />
 
     <item
         android:id="@+id/navigation_pick_recipe"
         android:icon="@drawable/add"
-        android:title="@string/pick_a_recipe"/>
+        android:title="@string/pick_a_recipe" />
 
-    <!--<item-->
-    <!--android:id="@+id/navigation_map"-->
-    <!--android:icon="@drawable/map"-->
-    <!--android:title="@string/map"/>-->
+    <item
+        android:id="@+id/navigation_create_menu"
+        android:icon="@drawable/cook_book"
+        android:title="@string/create_menu" />
+    <item
+        android:id="@+id/navigation_map"
+        android:icon="@drawable/map"
+        android:title="@string/map" />
 
 </menu>

@@ -49,12 +49,12 @@ public class FoundedRecipesFragment extends RecipesFragment {
 
         mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
         readRecipeList();
-            Context context = view.getContext();
-            RecyclerView recyclerView = view.findViewById(R.id.founded_recipes);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            foundedRecipes = new RecipeRecyclerViewAdapter(shp, mListener, mLikeListener,this, false);
-            recyclerView.setAdapter(foundedRecipes);
-            return view;
+        Context context = view.getContext();
+        RecyclerView recyclerView = view.findViewById(R.id.founded_recipes);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        foundedRecipes = new RecipeRecyclerViewAdapter(shp, mListener, mLikeListener, this, false);
+        recyclerView.setAdapter(foundedRecipes);
+        return view;
     }
 
     @Override
@@ -67,8 +67,7 @@ public class FoundedRecipesFragment extends RecipesFragment {
                 for (Recipe recipe : temp) {
                     int counter = 0;
                     int size = recipe.getIngredients().size();
-                    for(Ingredient ingredient: givenIngredients)
-                    {
+                    for (Ingredient ingredient : givenIngredients) {
                         if (recipe.getIngredients().contains(ingredient))
                             ++counter;
                     }

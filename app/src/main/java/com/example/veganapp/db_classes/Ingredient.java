@@ -19,7 +19,8 @@ public class Ingredient implements Serializable {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if ((obj instanceof Ingredient) && ((Ingredient)obj).getName().equals(name))
+
+        if ((obj instanceof Ingredient) && ((Ingredient) obj).getName().equals(name))
             return true;
         return false;
     }

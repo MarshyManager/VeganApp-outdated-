@@ -24,8 +24,8 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
     private ChosenIngredientsAdapter chosenIngredientsAdapter;
     private final Button findRecipes;
 
-    public IngredientsDialogAdapter(List<Ingredient> ingredients, ChosenIngredientsAdapter chosenIngredientsAdapter, Button findRecipes)
-    {
+
+    public IngredientsDialogAdapter(List<Ingredient> ingredients, ChosenIngredientsAdapter chosenIngredientsAdapter, Button findRecipes) {
         this.ingredients = ingredients;
         this.ingredientsFiltered = ingredients;
         this.chosenIngredientsAdapter = chosenIngredientsAdapter;
@@ -105,8 +105,7 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
             textView = itemView.findViewById(R.id.ingredient_name_search);
         }
 
-        void bind(Ingredient ingredient)
-        {
+        void bind(Ingredient ingredient) {
             this.ingredient = ingredient;
             textView.setText(ingredient.getName());
             enabled = !chosenIngredientsAdapter.contains(ingredient);

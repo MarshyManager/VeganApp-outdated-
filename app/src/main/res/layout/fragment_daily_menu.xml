@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.RecipeByIngredientFragment">
+    tools:context=".fragments.DailyMenuFragment">
+
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar_ingredient"
+        android:id="@+id/appbar_menu"
         android:layout_width="match_parent"
         android:layout_height="56dp">
 
@@ -15,27 +16,30 @@
             android:id="@+id/toolbar_ingredient"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary">
+            android:layout_alignTop="@+id/appbar_menu">
 
             <TextView
+                android:id="@+id/daily_menu_title"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center|start"
                 android:layout_marginStart="10dp"
                 android:gravity="center_vertical"
-                android:text="@string/add_ingredient"
+                android:text="@string/results"
+                android:textColor="@color/black"
                 android:textSize="20sp" />
 
             <Button
-                android:id="@+id/find_recipes"
-                android:layout_width="100dp"
+                android:id="@+id/create_menu_button"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|end"
+                android:layout_marginEnd="10dp"
                 android:background="@drawable/button_find_background"
                 android:clickable="true"
-                android:enabled="false"
                 android:focusable="true"
-                android:text="@string/find"
+                android:padding="5dp"
+                android:text="@string/create_menu"
                 android:textColor="@color/black"
                 android:textSize="20sp" />
 
@@ -43,10 +47,32 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/ingredient_list"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/recipes_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/appbar_ingredient"
-        tools:listitem="@layout/fragment_ingridient_item" />
+        android:layout_below="@+id/appbar_menu"
+        android:layout_margin="40dp">
+
+        <androidx.viewpager.widget.PagerTitleStrip
+            android:id="@+id/recipes_pager_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top" />
+    </androidx.viewpager.widget.ViewPager>
+
+    <com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator
+        android:id="@+id/recipes_menu_dots_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recipes_pager"
+        app:dampingRatio="0.5"
+        app:dotsColor="@color/black"
+        app:dotsCornerRadius="2dp"
+        app:dotsSize="16dp"
+        app:dotsSpacing="6dp"
+        app:dotsStrokeColor="@color/gold"
+        app:dotsStrokeWidth="2dp"
+        app:stiffness="300" />
+
 </RelativeLayout>

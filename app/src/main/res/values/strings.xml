@@ -26,5 +26,9 @@
     <string name="pick_a_recipe">Pick a recipe</string>
     <string name="results">Results</string>
     <string name="hide">Hide</string>
+    <string name="create_menu">Create Menu</string>
+    <string name="see_more">See more...</string>
+    <string name="find">Find</string>
+    <string name="map_not_ready">Map not ready</string>
 
 </resources>
