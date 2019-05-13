@@ -54,6 +54,7 @@ public class RecipeByIngredientFragment extends Fragment {
     IngredientsDialogAdapter ingredientsDialogAdapter;
     ChosenIngredientsAdapter chosenIngredientsAdapter;
     Button findRecipes;
+    TextView hintText;
     TextView hideDialog;
 
     public RecipeByIngredientFragment() {
@@ -83,10 +84,11 @@ public class RecipeByIngredientFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_ingredient_list, container, false);
         mToolbar = view.findViewById(R.id.toolbar_ingredient);
         findRecipes = view.findViewById(R.id.find_recipes);
+        hintText = view.findViewById(R.id.hint_text);
         Context context = view.getContext();
         recyclerViewChosen = view.findViewById(R.id.ingredient_list);
         recyclerViewChosen.setLayoutManager(new LinearLayoutManager(context));
-        chosenIngredientsAdapter = new ChosenIngredientsAdapter(findRecipes);
+        chosenIngredientsAdapter = new ChosenIngredientsAdapter(findRecipes, hintText);
         recyclerViewChosen.setAdapter(chosenIngredientsAdapter);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);

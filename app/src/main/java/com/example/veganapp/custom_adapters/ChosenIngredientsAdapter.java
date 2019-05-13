@@ -22,11 +22,13 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
 
     private final List<Ingredient> ingredients;
     private final Button findRecipes;
+    private final TextView textView;
 
 
-    public ChosenIngredientsAdapter(Button findRecipes) {
+    public ChosenIngredientsAdapter(Button findRecipes, TextView textView) {
         ingredients = new CopyOnWriteArrayList<>();
         this.findRecipes = findRecipes;
+        this.textView = textView;
     }
 
     @Override
@@ -56,6 +58,7 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
             ingredients.set(index, ingredient);
             notifyItemChanged(index);
         }
+        textView.setVisibility(View.GONE);
     }
 
     public void remove(Ingredient ingredient) {
@@ -64,8 +67,10 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
             ingredients.remove(ingredient);
             notifyItemRemoved(pos);
         }
-        if (ingredients.size() == 0)
+        if (ingredients.size() == 0) {
             findRecipes.setEnabled(false);
+            textView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void removeAt(int pos) {

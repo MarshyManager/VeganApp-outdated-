@@ -6,7 +6,13 @@
         android:id="@+id/options_add"
         android:icon="@drawable/add"
         android:title="@string/add_ingredient"
-        app:showAsAction="collapseActionView|always" />
+        app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/options_ban"
+        android:icon="@drawable/remove"
+        android:title="@string/ban_ingredient"
+        app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/options_settings"

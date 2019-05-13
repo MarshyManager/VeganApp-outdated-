@@ -3,6 +3,8 @@ package com.example.veganapp.support_classes;
 import com.example.veganapp.db_classes.Ingredient;
 import com.example.veganapp.db_classes.Recipe;
 
+import java.util.List;
+
 public class StringFormatter {
 
     private static final int ONE_THOUSAND = 1000;
@@ -24,6 +26,17 @@ public class StringFormatter {
                 sb.append(" - ").append(ingredient.getAmount());
             sb.append("\n");
         }
+        return sb.toString();
+    }
+
+    public static String dishTypes(Recipe recipe) {
+        StringBuilder sb = new StringBuilder();
+        List<String> types = recipe.getType();
+        for (int i = 0; i < types.size() - 1; ++i) {
+            sb.append(types.get(i));
+                sb.append(", ");
+        }
+        sb.append(types.get(types.size() - 1));
         return sb.toString();
     }
 }

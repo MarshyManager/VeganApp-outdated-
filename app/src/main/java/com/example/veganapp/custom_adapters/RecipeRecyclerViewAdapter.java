@@ -312,6 +312,8 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
         final View mView;
         final TextView mNameView;
         final TextView mViewsNum;
+        final TextView mIngestion;
+        final TextView mType;
         final ImageView mViewsImage;
         final ImageView mDishImage;
         final RatingBar mDishComplexity;
@@ -336,6 +338,8 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
             mDishRating = view.findViewById(R.id.dish_rating);
             mFavImage = view.findViewById(R.id.add_to_fav);
             mSwipeLayout = view.findViewById(R.id.swipe);
+            mIngestion = view.findViewById(R.id.ingestion_name);
+            mType = view.findViewById(R.id.type_name);
         }
 
         void bind(Recipe recipe) {
@@ -344,6 +348,8 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
             mDishComplexity.setRating(recipe.getComplexity().floatValue());
             mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
             mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));
+            mIngestion.setText(recipe.getIngestion());
+            mType.setText(StringFormatter.dishTypes(recipe));
 
             if (!shp.getBoolean("recipe_offline_like_" + recipe.getId(), false))
                 Picasso.with(mView.getContext()).load(R.drawable.like).into(mDishRating);
