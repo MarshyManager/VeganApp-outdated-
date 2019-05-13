@@ -26,7 +26,7 @@
         android:id="@+id/delete_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFF0000">
+        android:background="@color/red">
 
         <ImageView
             android:id="@+id/trash"
@@ -53,7 +53,7 @@
         android:id="@+id/view_foreground"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@color/cards_and_dialogs_color"
+        android:background="@color/white"
         android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView

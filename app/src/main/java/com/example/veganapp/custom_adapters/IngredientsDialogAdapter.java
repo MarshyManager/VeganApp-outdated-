@@ -23,12 +23,15 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
     private List<Ingredient> ingredientsFiltered;
     private ChosenIngredientsAdapter chosenIngredientsAdapter;
     private final Button findRecipes;
+    boolean addType;
 
-    public IngredientsDialogAdapter(List<Ingredient> ingredients, ChosenIngredientsAdapter chosenIngredientsAdapter, Button findRecipes) {
+    public IngredientsDialogAdapter(List<Ingredient> ingredients, ChosenIngredientsAdapter chosenIngredientsAdapter,
+                                    Button findRecipes, boolean addType) {
         this.ingredients = ingredients;
         this.ingredientsFiltered = ingredients;
         this.chosenIngredientsAdapter = chosenIngredientsAdapter;
         this.findRecipes = findRecipes;
+        this.addType = addType;
     }
 
     @NonNull
@@ -46,7 +49,7 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                chosenIngredientsAdapter.addOrChange(holder.ingredient);
+                chosenIngredientsAdapter.addOrChange(holder.ingredient, addType);
                 findRecipes.setEnabled(true);
                 holder.mView.setEnabled(holder.enabled = false);
             }
@@ -97,6 +100,7 @@ public class IngredientsDialogAdapter extends RecyclerView.Adapter<IngredientsDi
         final TextView textView;
         Ingredient ingredient;
         Boolean enabled = true;
+        Boolean addType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

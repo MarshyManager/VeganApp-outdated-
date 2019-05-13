@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,11 +19,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredientsAdapter.ViewHolder> {
 
     private final List<Ingredient> ingredients;
+    private final List<Boolean> addTypeList;
     private final Button findRecipes;
     private final TextView textView;
 
 
     public ChosenIngredientsAdapter(Button findRecipes, TextView textView) {
+        addTypeList = new CopyOnWriteArrayList<>();
         ingredients = new CopyOnWriteArrayList<>();
         this.findRecipes = findRecipes;
         this.textView = textView;
@@ -42,29 +42,33 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
         return ingredients.contains(ingredient);
     }
 
-    public void insert(Ingredient ingredient, int pos) {
+    public void insert(Ingredient ingredient, int pos, boolean addType) {
         if (pos >= ingredients.size())
             pos = ingredients.size() - 1;
         ingredients.add(pos, ingredient);
+        addTypeList.add(addType);
         notifyItemInserted(pos);
     }
 
-    public void addOrChange(Ingredient ingredient) {
+    public void addOrChange(Ingredient ingredient, boolean addType) {
         if (!ingredients.contains(ingredient)) {
             ingredients.add(ingredient);
+            addTypeList.add(addType);
             notifyItemInserted(ingredients.size() - 1);
         } else {
             int index = ingredients.indexOf(ingredient);
             ingredients.set(index, ingredient);
+            addTypeList.set(index, addType);
             notifyItemChanged(index);
         }
         textView.setVisibility(View.GONE);
     }
 
-    public void remove(Ingredient ingredient) {
+    public void remove(Ingredient ingredient, boolean addType) {
         int pos;
         if ((pos = ingredients.indexOf(ingredient)) >= 0) {
             ingredients.remove(ingredient);
+            addTypeList.remove(pos);
             notifyItemRemoved(pos);
         }
         if (ingredients.size() == 0) {
@@ -75,6 +79,7 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
 
     public void removeAt(int pos) {
         ingredients.remove(pos);
+        addTypeList.remove(pos);
         notifyItemRemoved(pos);
         if (ingredients.size() == 0)
             findRecipes.setEnabled(false);
@@ -87,11 +92,15 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.ingredient = ingredients.get(position);
+        if (addTypeList.get(position))
+            holder.mView.setBackgroundResource(R.color.colorPrimaryDark);
+        else
+            holder.mView.setBackgroundResource(R.color.red);
         holder.mNameView.setText(ingredients.get(position).getName());
         holder.mRemoveView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                remove(holder.ingredient);
+                remove(holder.ingredient, false);
             }
         });
 //        holder.mView.setOnClickListener(new View.OnClickListener() {

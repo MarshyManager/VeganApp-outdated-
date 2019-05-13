@@ -32,4 +32,37 @@
         <item name="android:popupElevation">0dp</item>
     </style>
 
+    <style name="ExpandedTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowRadius">9</item>
+        <item name="android:shadowColor">@android:color/black</item>
+        <item name="android:singleLine">false</item>
+    </style>
+
+    <style name="ExpandedSubTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowRadius">7</item>
+        <item name="android:shadowColor">@android:color/black</item>
+    </style>
+
+    <style name="CollapsedTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CollapsedSubTitleStyle" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
 </resources>

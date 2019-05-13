@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar_recipe_list"
             tools:context=".fragments.RecipesFragment"
-            tools:listitem="@layout/fragment_recipe" />
+            tools:listitem="@layout/fragment_recipe_item" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

@@ -110,6 +110,7 @@ public class RecipeByIngredientFragment extends Fragment {
         inflater.inflate(R.menu.options_menu_ingridients_list, menu);
         super.onCreateOptionsMenu(menu, inflater);
         MenuItem mAddItem = menu.findItem(R.id.options_add);
+        MenuItem mBanItem = menu.findItem(R.id.options_ban);
         mAddItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -123,7 +124,60 @@ public class RecipeByIngredientFragment extends Fragment {
                         return lhs.getName().compareTo(rhs.getName());
                     }
                 });
-                ingredientsDialogAdapter = new IngredientsDialogAdapter(ingredientList, (ChosenIngredientsAdapter) recyclerViewChosen.getAdapter(), findRecipes);
+                ingredientsDialogAdapter = new IngredientsDialogAdapter(ingredientList, (ChosenIngredientsAdapter) recyclerViewChosen.getAdapter(), findRecipes, true);
+                recyclerViewDialog = view.findViewById(R.id.ingredients_search_adapter);
+                hideDialog = view.findViewById(R.id.hide_dialog);
+                recyclerViewDialog.setLayoutManager(new LinearLayoutManager(view.getContext()));
+                recyclerViewDialog.setAdapter(ingredientsDialogAdapter);
+                SearchView mSearchView = view.findViewById(R.id.search_ingredients);
+                if (mSearchView != null) {
+                    mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                        @Override
+                        public boolean onQueryTextSubmit(String query) {
+                            onQueryTextChange(query);
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String newText) {
+                            ingredientsDialogAdapter.getFilter().filter(newText);
+                            return true;
+                        }
+                    });
+                    mSearchView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ((SearchView) v).setIconified(false);
+                        }
+                    });
+                }
+                final AlertDialog alertDialog = builder.setView(view).create();
+                alertDialog.show();
+                hideDialog.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alertDialog.dismiss();
+                    }
+                });
+                return true;
+            }
+        });
+        mBanItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View view = inflater.inflate(R.layout.ingredient_dialog, null);
+                List<Ingredient> ingredientList = new ArrayList<>(uniqueIngredients);
+                Collections.sort(ingredientList, new Comparator<Ingredient>() {
+                    @Override
+                    public int compare(Ingredient lhs, Ingredient rhs) {
+                        return lhs.getName().compareTo(rhs.getName());
+                    }
+                });
+                ingredientsDialogAdapter = new IngredientsDialogAdapter(ingredientList, (ChosenIngredientsAdapter) recyclerViewChosen.getAdapter(), findRecipes, false);
                 recyclerViewDialog = view.findViewById(R.id.ingredients_search_adapter);
                 hideDialog = view.findViewById(R.id.hide_dialog);
                 recyclerViewDialog.setLayoutManager(new LinearLayoutManager(view.getContext()));

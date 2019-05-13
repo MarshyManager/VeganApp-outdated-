@@ -36,6 +36,6 @@
         android:layout_height="match_parent"
         android:layout_below="@id/appbar_founded_recipes"
         tools:context=".fragments.FoundedRecipesFragment"
-        tools:listitem="@layout/fragment_recipe" />
+        tools:listitem="@layout/fragment_recipe_item" />
 
 </RelativeLayout>

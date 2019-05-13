@@ -2,6 +2,7 @@ package com.example.veganapp.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
@@ -80,7 +81,10 @@ public class CookInstructionFragment extends Fragment {
 
         sctl.setTitle(recipe.getName());
         sctl.setSubtitle(recipe.getIngestion());
-
+        sctl.setExpandedTitleTextAppearance(R.style.ExpandedTitleStyle);
+        sctl.setExpandedSubtitleTextAppearance(R.style.ExpandedSubTitleStyle);
+        sctl.setCollapsedTitleTextAppearance(R.style.CollapsedTitleStyle);
+        sctl.setCollapsedSubtitleTextAppearance(R.style.CollapsedSubTitleStyle);
         mComplexity.setRating(recipe.getComplexity().floatValue());
         mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
         mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));

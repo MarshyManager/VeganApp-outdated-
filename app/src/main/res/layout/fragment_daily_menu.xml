@@ -65,6 +65,7 @@
         android:id="@+id/recipes_menu_dots_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_below="@+id/recipes_pager"
         app:dampingRatio="0.5"
         app:dotsColor="@color/black"
