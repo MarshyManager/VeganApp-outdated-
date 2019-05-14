@@ -47,12 +47,26 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <TextView
+        android:id="@+id/create_menu_instruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:elevation="5dp"
+        android:gravity="center"
+        android:padding="15dp"
+        android:text="@string/create_menu_instruction"
+        android:textSize="15sp" />
+
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/recipes_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/recipes_menu_dots_indicator"
         android:layout_below="@+id/appbar_menu"
-        android:layout_margin="40dp">
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="40dp">
 
         <androidx.viewpager.widget.PagerTitleStrip
             android:id="@+id/recipes_pager_title"
@@ -65,15 +79,19 @@
         android:id="@+id/recipes_menu_dots_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/recipes_pager"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone"
         app:dampingRatio="0.5"
-        app:dotsColor="@color/black"
-        app:dotsCornerRadius="2dp"
+        app:dotsColor="@color/color_primary"
+        app:dotsCornerRadius="8dp"
         app:dotsSize="16dp"
         app:dotsSpacing="6dp"
-        app:dotsStrokeColor="@color/gold"
+        app:dotsStrokeColor="@color/color_primary"
         app:dotsStrokeWidth="2dp"
         app:stiffness="300" />
+
 
 </RelativeLayout>

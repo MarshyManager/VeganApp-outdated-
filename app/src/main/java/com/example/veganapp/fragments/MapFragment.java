@@ -3,27 +3,26 @@ package com.example.veganapp.fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.veganapp.support_classes.OnMapAndViewReadyListener;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Restaurant;
 import com.example.veganapp.support_classes.PermissionUtils;
+import com.example.veganapp.support_classes.StringFormatter;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -31,19 +30,22 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Period;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
+import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 public class MapFragment extends Fragment implements
@@ -62,6 +64,7 @@ public class MapFragment extends Fragment implements
     private FusedLocationProviderClient fusedLocationClient;
     private final List<Place> places = new ArrayList<>();
     private final List<Marker> mMarkers = new ArrayList<>();
+    PlacesClient placesClient;
 
 
     public MapFragment() {
@@ -90,8 +93,10 @@ public class MapFragment extends Fragment implements
                 ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
         new OnMapAndViewReadyListener(mapFragment, this);
 
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
-        PlacesClient placesClient = Places.createClient(getActivity());
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME,
+                Place.Field.LAT_LNG, Place.Field.OPENING_HOURS, Place.Field.RATING, Place.Field.PRICE_LEVEL,
+                Place.Field.PHOTO_METADATAS);
+        placesClient = Places.createClient(getActivity());
         for (int i = 0; i < restaurants.size(); ++i) {
             String placeId = restaurants.get(i).getId();
             FetchPlaceRequest request = FetchPlaceRequest.builder(placeId, placeFields).build();
@@ -99,7 +104,7 @@ public class MapFragment extends Fragment implements
                 @Override
                 public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
                     places.add(fetchPlaceResponse.getPlace());
-                    if (places.size() == restaurants.size() - 1)
+                    if (places.size() == restaurants.size())
                         addMarkersToMap();
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -144,7 +149,7 @@ public class MapFragment extends Fragment implements
 
         // Setting an info window adapter allows us to change the both the contents and look of the
         // info window.
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(places));
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
 
         // Set listeners for marker events.  See the bottom of this class for their behavior.
         mMap.setOnMarkerClickListener(this);
@@ -159,7 +164,7 @@ public class MapFragment extends Fragment implements
             Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(places.get(i).getLatLng())
                     .title(places.get(i).getName())
-                    .icon(BitmapDescriptorFactory.defaultMarker()));
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_for_map)));
             mMarkers.add(marker);
             if (i == 0)
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(places.get(i).getLatLng(), 12.0f));
@@ -223,11 +228,8 @@ public class MapFragment extends Fragment implements
         // "title" and "snippet".
         private final View mContents;
 
-        private final List<Place> mPlaces;
-
-        CustomInfoWindowAdapter(List<Place> places) {
+        CustomInfoWindowAdapter() {
             mContents = getActivity().getLayoutInflater().inflate(R.layout.custom_marker_content, null);
-            mPlaces = places;
         }
 
         @Override
@@ -237,35 +239,49 @@ public class MapFragment extends Fragment implements
 
         @Override
         public View getInfoContents(Marker marker) {
-            render(marker, mContents);
+            render(marker, mContents, mMarkers.indexOf(marker));
             return mContents;
         }
 
-        private void render(Marker marker, View view) {
-            int badge = 0;
-//            ((ImageView) view.findViewById(R.id.place_image)).setImageResource(badge);
+        private void render(Marker marker, View view, int pos) {
+            final ImageView iv = view.findViewById(R.id.place_image);
 
+            FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(places.get(pos).getPhotoMetadatas().get(0))
+                    .setMaxWidth(500) // Optional.
+                    .setMaxHeight(300) // Optional.
+                    .build();
+            placesClient.fetchPhoto(photoRequest).addOnSuccessListener(new OnSuccessListener<FetchPhotoResponse>() {
+                @Override
+                public void onSuccess(FetchPhotoResponse fetchPhotoResponse) {
+                    Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                    iv.setImageBitmap(bitmap);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    if (e instanceof ApiException) {
+                        ApiException apiException = (ApiException) e;
+                        int statusCode = apiException.getStatusCode();
+                    }
+                }
+            });
             String title = marker.getTitle();
             TextView titleUi = view.findViewById(R.id.place_title);
-            if (title != null) {
-                // Spannable string allows us to edit the formatting of the text.
-                SpannableString titleText = new SpannableString(title);
-                titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
-                titleUi.setText(titleText);
-            } else {
-                titleUi.setText("");
-            }
-
-//            String snippet = marker.getSnippet();
-//            TextView snippetUi = view.findViewById(R.id.place_subtitle);
-//            if (snippet != null && snippet.length() > 12) {
-//                SpannableString snippetText = new SpannableString(snippet);
-//                snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
-//                snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 12, snippet.length(), 0);
-//                snippetUi.setText(snippetText);
-//            } else {
-//                snippetUi.setText("");
-//            }
+            titleUi.setText(places.get(pos).getName());
+            TextView openHours = view.findViewById(R.id.place_open_hours);
+            int currentCalendarDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1;
+            Period period = places.get(pos).getOpeningHours().getPeriods().get(currentCalendarDay);
+            openHours.setText(StringFormatter.openHours(period));
+            TextView rating = view.findViewById(R.id.place_rating);
+            if (places.get(pos).getRating() != null)
+                rating.setText(places.get(pos).getRating().toString());
+            else
+                rating.setText("...");
+            TextView priceLevel = view.findViewById(R.id.place_price_level);
+            if (places.get(pos).getPriceLevel() != null)
+                priceLevel.setText(places.get(pos).getPriceLevel().toString() + "/5");
+            else
+                priceLevel.setText("...");
         }
     }
 }

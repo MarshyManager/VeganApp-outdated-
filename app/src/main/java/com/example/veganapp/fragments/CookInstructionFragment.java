@@ -32,6 +32,8 @@ public class CookInstructionFragment extends Fragment {
     protected TextView mViewsNum;
     protected TextView mRecipeText;
     protected TextView mIngredientsText;
+    protected TextView mIngestion;
+    protected TextView mType;
     protected RatingBar mComplexity;
     protected ImageView mDishImage;
     protected ImageView mRateImage;
@@ -77,16 +79,13 @@ public class CookInstructionFragment extends Fragment {
         mComplexity = v.findViewById(R.id.instr_complexity);
         mDishImage = v.findViewById(R.id.instr_image);
         mRateImage = v.findViewById(R.id.instr_rate);
+        mIngestion = v.findViewById(R.id.ingestion_name);
+        mType = v.findViewById(R.id.type_name);
         Toolbar toolbar = v.findViewById(R.id.cook_instruction_toolbar);
         CollapsingToolbarLayout ctl = v.findViewById(R.id.cook_instruction_toolbar_layout);
-
-//        sctl.setTitle(recipe.getName());
-//        sctl.setSubtitle(recipe.getIngestion());
-//        sctl.setExpandedTitleTextAppearance(R.style.ExpandedTitleStyle);
-//        sctl.setExpandedSubtitleTextAppearance(R.style.ExpandedSubTitleStyle);
-//        sctl.setCollapsedTitleTextAppearance(R.style.CollapsedTitleStyle);
-//        sctl.setCollapsedSubtitleTextAppearance(R.style.CollapsedSubTitleStyle);
         ctl.setTitle(recipe.getName());
+        mIngestion.setText(recipe.getIngestion());
+        mType.setText(StringFormatter.dishTypes(recipe));
         mComplexity.setRating(recipe.getComplexity().floatValue());
         mViewsNum.setText(StringFormatter.formStringValueFromInt(recipe.getViews()));
         mRateNum.setText(StringFormatter.formStringValueFromInt(recipe.getRate()));

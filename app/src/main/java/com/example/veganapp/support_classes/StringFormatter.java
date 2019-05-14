@@ -2,6 +2,7 @@ package com.example.veganapp.support_classes;
 
 import com.example.veganapp.db_classes.Ingredient;
 import com.example.veganapp.db_classes.Recipe;
+import com.google.android.libraries.places.api.model.Period;
 
 import java.util.List;
 
@@ -37,6 +38,25 @@ public class StringFormatter {
                 sb.append(", ");
         }
         sb.append(types.get(types.size() - 1));
+        return sb.toString();
+    }
+
+    public static String openHours(Period period)
+    {
+        StringBuilder sb = new StringBuilder().append(period.getOpen().getTime().getHours());
+        if (period.getOpen().getTime().getMinutes() == 0)
+            sb.append(":00 - ");
+        else if (period.getOpen().getTime().getMinutes() < 10)
+            sb.append(":0").append(period.getOpen().getTime().getMinutes()).append(" - ");
+        else
+            sb.append(":").append(period.getOpen().getTime().getMinutes()).append(" - ");
+        sb.append(period.getClose().getTime().getHours());
+        if (period.getClose().getTime().getMinutes() == 0)
+            sb.append(":00");
+        else if (period.getClose().getTime().getMinutes() < 10)
+            sb.append(":0").append(period.getOpen().getTime().getMinutes());
+        else
+            sb.append(":").append(period.getClose().getTime().getMinutes());
         return sb.toString();
     }
 }

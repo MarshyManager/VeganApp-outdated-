@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.viewpager.widget.PagerTitleStrip;
 import androidx.viewpager.widget.ViewPager;
 
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ public class DailyMenuFragment extends RecipesFragment {
     SpringDotsIndicator dotsIndicator;
     PagerTitleStrip menuTitleStrip;
     MenuPagerAdapter menuPagerAdapter;
+    TextView instruction;
 
     public DailyMenuFragment() {
     }
@@ -54,9 +56,11 @@ public class DailyMenuFragment extends RecipesFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_menu, container, false);
+        instruction = view.findViewById(R.id.create_menu_instruction);
         dotsIndicator = view.findViewById(R.id.recipes_menu_dots_indicator);
         viewPager = view.findViewById(R.id.recipes_pager);
         menuTitleStrip = view.findViewById(R.id.recipes_pager_title);
+        menuTitleStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
         Button button = view.findViewById(R.id.create_menu_button);
         final String[] ingestionTypes = {"Завтрак", "Перекус", "Обед", "Десерт"};
@@ -91,8 +95,10 @@ public class DailyMenuFragment extends RecipesFragment {
                                 recipes.add(recipe);
                         }
                         menuPagerAdapter = new MenuPagerAdapter(recipes, inflater);
+                        instruction.setVisibility(View.GONE);
                         viewPager.setAdapter(menuPagerAdapter);
                         dotsIndicator.setViewPager(viewPager);
+                        dotsIndicator.setVisibility(View.VISIBLE);
                     }
 
                 });

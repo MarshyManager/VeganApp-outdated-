@@ -13,6 +13,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
 import com.squareup.picasso.Picasso;
+import com.tbuonomo.viewpagerdotsindicator.SpringDotsIndicator;
 
 import java.util.List;
 

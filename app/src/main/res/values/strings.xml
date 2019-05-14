@@ -35,5 +35,6 @@
     <string name="no_recipes_found">No recipes found.</string>
     <string name="daily_menu">Daily menu</string>
     <string name="clear_ingredient_list">Clear ingredient list</string>
+    <string name="create_menu_instruction">Click on \"CREATE MENU\" to generate daily menu.</string>
 
 </resources>
