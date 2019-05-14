@@ -11,23 +11,28 @@
         android:layout_width="match_parent"
         android:layout_height="56dp">
 
-            <TextView
-                android:id="@+id/sort_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/results"
-                android:layout_marginStart="10dp"
-                android:gravity="center|start" />
-
         <TextView
             android:id="@+id/founded_recipes_title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
             android:gravity="center|start"
-            android:text="@string/results" />
+            android:text="@string/found_recipes"
+            android:textSize="20sp"
+            android:textColor="@color/black"/>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <TextView
+        android:id="@+id/message_no_recipes_found"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center"
+        android:text="@string/no_recipes_found"
+        android:textSize="15sp"
+        android:padding="15dp"
+        android:elevation="5dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/founded_recipes"

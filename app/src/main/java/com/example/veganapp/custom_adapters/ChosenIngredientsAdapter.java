@@ -20,8 +20,8 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
 
     private final List<Ingredient> ingredients;
     private final List<Boolean> addTypeList;
-    private final Button findRecipes;
-    private final TextView textView;
+    private Button findRecipes;
+    private TextView textView;
 
 
     public ChosenIngredientsAdapter(Button findRecipes, TextView textView) {
@@ -34,8 +34,16 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_ingridient_item, parent, false);
+                .inflate(R.layout.fragment_ingredient_item, parent, false);
         return new ViewHolder(view);
+    }
+
+    public void clear() {
+        ingredients.clear();
+        addTypeList.clear();
+        textView.setVisibility(View.VISIBLE);
+        findRecipes.setEnabled(false);
+        notifyDataSetChanged();
     }
 
     public boolean contains(Ingredient ingredient) {
@@ -64,7 +72,7 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
         textView.setVisibility(View.GONE);
     }
 
-    public void remove(Ingredient ingredient, boolean addType) {
+    public void remove(Ingredient ingredient) {
         int pos;
         if ((pos = ingredients.indexOf(ingredient)) >= 0) {
             ingredients.remove(ingredient);
@@ -85,34 +93,38 @@ public class ChosenIngredientsAdapter extends RecyclerView.Adapter<ChosenIngredi
             findRecipes.setEnabled(false);
     }
 
+    public void setTextView(TextView textView) {
+        this.textView = textView;
+    }
+
+    public void setFindRecipes(Button findRecipes) {
+        this.findRecipes = findRecipes;
+    }
+
     public List<Ingredient> getIngredients() {
         return ingredients;
+    }
+
+    public List<Boolean> getAddTypeList() {
+        return addTypeList;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.ingredient = ingredients.get(position);
+
         if (addTypeList.get(position))
             holder.mView.setBackgroundResource(R.color.color_primary_dark);
         else
             holder.mView.setBackgroundResource(R.color.red);
+
         holder.mNameView.setText(ingredients.get(position).getName());
         holder.mRemoveView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                remove(holder.ingredient, false);
+                remove(holder.ingredient);
             }
         });
-//        holder.mView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (null != mListener) {
-//                    // Notify the active callbacks interface (the activity, if the
-//                    // fragment is attached to one) that an item has been selected.
-//                    mListener.onListFragmentInteraction(holder.ingredient);
-//                }
-//            }
-//        });
     }
 
     @Override

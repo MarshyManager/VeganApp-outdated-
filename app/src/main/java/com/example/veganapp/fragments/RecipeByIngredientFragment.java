@@ -39,6 +39,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class RecipeByIngredientFragment extends Fragment {
@@ -46,6 +47,8 @@ public class RecipeByIngredientFragment extends Fragment {
     final static String FOUNDED_RECIPES = "founded_recipes";
 
     protected List<Recipe> recipes;
+    protected List<Boolean> savedBool;
+    protected List<Ingredient> savedIngredients;
     protected Set<Ingredient> uniqueIngredients;
     protected Toolbar mToolbar;
     protected String path;
@@ -88,7 +91,15 @@ public class RecipeByIngredientFragment extends Fragment {
         Context context = view.getContext();
         recyclerViewChosen = view.findViewById(R.id.ingredient_list);
         recyclerViewChosen.setLayoutManager(new LinearLayoutManager(context));
-        chosenIngredientsAdapter = new ChosenIngredientsAdapter(findRecipes, hintText);
+        if (chosenIngredientsAdapter == null)
+            chosenIngredientsAdapter = new ChosenIngredientsAdapter(findRecipes, hintText);
+        else if (chosenIngredientsAdapter.getItemCount() > 0){
+            chosenIngredientsAdapter.setFindRecipes(findRecipes);
+            chosenIngredientsAdapter.setTextView(hintText);
+            hintText.setVisibility(View.GONE);
+            findRecipes.setEnabled(true);
+        }
+
         recyclerViewChosen.setAdapter(chosenIngredientsAdapter);
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
@@ -98,7 +109,7 @@ public class RecipeByIngredientFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentTransaction ftrans = getActivity().getSupportFragmentManager().beginTransaction();
-                FoundedRecipesFragment frf = FoundedRecipesFragment.newInstance(chosenIngredientsAdapter.getIngredients());
+                FoundedRecipesFragment frf = FoundedRecipesFragment.newInstance(chosenIngredientsAdapter.getIngredients(), chosenIngredientsAdapter.getAddTypeList());
                 ftrans.replace(R.id.fragment_container, frf).addToBackStack(FOUNDED_RECIPES).commit();
             }
         });
@@ -109,8 +120,16 @@ public class RecipeByIngredientFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.options_menu_ingridients_list, menu);
         super.onCreateOptionsMenu(menu, inflater);
+        MenuItem mClearItem = menu.findItem(R.id.options_clear);
         MenuItem mAddItem = menu.findItem(R.id.options_add);
         MenuItem mBanItem = menu.findItem(R.id.options_ban);
+        mClearItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                chosenIngredientsAdapter.clear();
+                return true;
+            }
+        });
         mAddItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -217,6 +236,19 @@ public class RecipeByIngredientFragment extends Fragment {
                 return true;
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        onSaveInstanceState(new Bundle());
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("boolean_values", (CopyOnWriteArrayList) chosenIngredientsAdapter.getAddTypeList());
+        outState.putSerializable("ingredients", (CopyOnWriteArrayList) chosenIngredientsAdapter.getIngredients());
     }
 
 

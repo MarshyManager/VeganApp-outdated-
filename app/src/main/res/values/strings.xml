@@ -30,6 +30,10 @@
     <string name="find">Find</string>
     <string name="map_not_ready">Map not ready</string>
     <string name="ban_ingredient">Ban ingredient</string>
-    <string name="pick_recipe_instruction">Click on \"+\" to add ingredients you have. Click on \"-\" to ban undesirable ingredients.</string>
+    <string name="pick_recipe_instruction">Click on \"+\" to add ingredients you have. Click on \"-\" to ban undesirable ingredients. Click on \"✕\" to clear ingredients list.</string>
+    <string name="found_recipes">Found recipes</string>
+    <string name="no_recipes_found">No recipes found.</string>
+    <string name="daily_menu">Daily menu</string>
+    <string name="clear_ingredient_list">Clear ingredient list</string>
 
 </resources>
