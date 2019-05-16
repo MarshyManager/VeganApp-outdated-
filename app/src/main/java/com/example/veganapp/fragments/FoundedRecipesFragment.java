@@ -56,7 +56,7 @@ public class FoundedRecipesFragment extends RecipesFragment {
         Context context = view.getContext();
         RecyclerView recyclerView = view.findViewById(R.id.founded_recipes);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        foundedRecipes = new RecipeRecyclerViewAdapter(shp, mListener, mLikeListener, this, false);
+        foundedRecipes = new RecipeRecyclerViewAdapter(shp, mListListener, mLikeListener, this, false);
         recyclerView.setAdapter(foundedRecipes);
         return view;
     }
@@ -67,6 +67,11 @@ public class FoundedRecipesFragment extends RecipesFragment {
         getView().post(new Runnable() {
             @Override
             public void run() {
+                /* recipes – поле класса – список всех имеющихся рецептов,
+                givenIngredients – поле класса – список всех имеющихся рецептов,
+                addTypeList – поле класса – список логических переменных
+                (обозначающих желательность/нежелательность ингредиентов),
+                foundedRecipes - адаптер содержащий найденные рецепты */
                 readRecipeList();
                 List<Recipe> temp = new ArrayList<>(recipes);
                 for (Recipe recipe : temp) {

@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Objects;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
 public class RecipesFragment extends Fragment {
@@ -79,7 +80,7 @@ public class RecipesFragment extends Fragment {
     protected static final String RECIPES_ONLINE_LIKE = "recipe_online_like_";
 
     List<Recipe> recipes;
-    protected OnRecipeListFragmentInteractionListener mListener;
+    protected OnRecipeListFragmentInteractionListener mListListener;
     protected OnRecipeLikeFragmentInteractionListener mLikeListener;
     protected SharedPreferences shp;
     protected Spinner sortSpinner;
@@ -127,7 +128,7 @@ public class RecipesFragment extends Fragment {
 
         path = getActivity().getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
 
-        recyclerViewAdapter = new RecipeRecyclerViewAdapter(shp, mListener, mLikeListener, this, filter);
+        recyclerViewAdapter = new RecipeRecyclerViewAdapter(shp, mListListener, mLikeListener, this, filter);
 
         if (isOnline) {
             db = FirebaseDatabase.getInstance();
@@ -273,7 +274,7 @@ public class RecipesFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         if ((context instanceof OnRecipeListFragmentInteractionListener) && (context instanceof OnRecipeLikeFragmentInteractionListener)) {
-            mListener = (OnRecipeListFragmentInteractionListener) context;
+            mListListener = (OnRecipeListFragmentInteractionListener) context;
             mLikeListener = (OnRecipeLikeFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
@@ -290,16 +291,9 @@ public class RecipesFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (mSearchItem != null)
-            mSearchItem.collapseActionView();
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mListListener = null;
     }
 
 
@@ -505,8 +499,10 @@ public class RecipesFragment extends Fragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
-                        mToolbar.setBackgroundColor(getThemeColor(getActivity(), R.color.color_primary));
-                        getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.color_primary_dark));
+                        if (getActivity() != null) {
+                            mToolbar.setBackgroundColor(getThemeColor(getActivity(), R.color.color_primary));
+                            getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.color_primary_dark));
+                        }
                     }
                 });
                 createCircularReveal.start();

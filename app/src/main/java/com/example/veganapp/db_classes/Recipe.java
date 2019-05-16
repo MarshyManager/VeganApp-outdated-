@@ -3,8 +3,6 @@ package com.example.veganapp.db_classes;
 import java.io.Serializable;
 import java.util.List;
 
-import androidx.annotation.Nullable;
-
 public class Recipe implements Serializable {
 
     private Integer Id;
