@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-
-public class DailyMenuFragment extends RecipesFragment {
+public class DailyMenuFragment extends BaseRecipesFragment {
 
     ViewPager viewPager;
     SpringDotsIndicator dotsIndicator;
@@ -51,6 +50,7 @@ public class DailyMenuFragment extends RecipesFragment {
         super.onCreate(savedInstanceState);
         chosenRecipes = new ArrayList<>();
         menuPagerAdapter = new MenuPagerAdapter(chosenRecipes, this, mListListener);
+        readRecipeList();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class DailyMenuFragment extends RecipesFragment {
 
         menuTitleStrip = view.findViewById(R.id.recipes_pager_title);
         menuTitleStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
+        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.loading_data_progress_bar);
         Button button = view.findViewById(R.id.create_menu_button);
         final String[] ingestionTypes = {"Завтрак", "Перекус", "Обед", "Десерт"};
         readRecipeList();
@@ -87,16 +87,14 @@ public class DailyMenuFragment extends RecipesFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         HashMap<String, List<Recipe>> ingestionHashMap = new HashMap<>();
                         chosenRecipes.clear();
-                        for (Recipe recipe : recipes) {
+                        for (Recipe recipe : mRecipeList) {
                             if (ingestionHashMap.get(recipe.getIngestion()) == null)
                                 ingestionHashMap.put(recipe.getIngestion(), new ArrayList<Recipe>());
                             ingestionHashMap.get(recipe.getIngestion()).add(recipe);
                         }
                         dialog.dismiss();
-                        LayoutInflater inflater = LayoutInflater.from(getActivity());
                         for (int i = 0; i < which + 2; i++) {
                             Recipe recipe = ingestionHashMap.get(ingestionTypes[i]).get((int) (Math.random() * ingestionHashMap.get(ingestionTypes[i]).size()));
-
                             if (i == 2)
                                 chosenRecipes.add(1, recipe);
                             else if (i == 3)
@@ -115,8 +113,7 @@ public class DailyMenuFragment extends RecipesFragment {
         return view;
     }
 
-    private void showDotsIndicator(int itemCount)
-    {
+    private void showDotsIndicator(int itemCount) {
         if (itemCount > 0) {
             dotsIndicator.setVisibility(View.VISIBLE);
             instruction.setVisibility(View.GONE);
@@ -126,11 +123,8 @@ public class DailyMenuFragment extends RecipesFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnRecipeListFragmentInteractionListener) {
-            mListListener = (OnRecipeListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+        mListListener = (OnRecipeListFragmentInteractionListener) context;
+
+        mPath = context.getApplicationContext().getFilesDir().getPath() + RECIPES_SERIALIZED_PATH;
     }
 }

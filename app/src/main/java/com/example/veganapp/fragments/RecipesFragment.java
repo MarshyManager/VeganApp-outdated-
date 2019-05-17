@@ -12,7 +12,6 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,7 +31,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import androidx.appcompat.widget.SearchView;
 
@@ -57,54 +55,46 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import jp.wasabeef.recyclerview.animators.LandingAnimator;
 
-public class RecipesFragment extends Fragment {
+import static com.example.veganapp.support_classes.ConnectionChecker.isOnline;
+import static com.example.veganapp.support_classes.ImportantConstants.RECIPES_OFFLINE_LIKE_TAG;
+import static com.example.veganapp.support_classes.ImportantConstants.RECIPES_ONLINE_LIKE_TAG;
 
-    protected static final String ARG_FILTER = "filter";
-    protected static final String RECIPES = "recipes";
-    protected static final String SHARED_PREFERENCES = "shared_preferences";
-    protected static final String SORT_TYPE = "sort_type";
-    protected static final String RECIPES_SER = "/recipes_ser";
-    protected static final String RECIPES_OFFLINE_LIKE = "recipe_offline_like_";
-    protected static final String RECIPES_ONLINE_LIKE = "recipe_online_like_";
+public class RecipesFragment extends BaseRecipesFragment {
 
-    List<Recipe> recipes;
-    protected OnRecipeListFragmentInteractionListener mListListener;
-    protected OnRecipeLikeFragmentInteractionListener mLikeListener;
-    protected SharedPreferences shp;
-    protected Spinner sortSpinner;
-    protected ProgressBar mProgressBar;
-    protected boolean filter;
-    protected RecipeRecyclerViewAdapter recyclerViewAdapter;
-    protected String[] sortParams;
-    protected int sortType;
-    protected String path;
-    protected boolean isOnline;
-    FirebaseDatabase db;
+    protected static final String RECIPES_REF = "recipes";
+
+    protected Spinner mSortSpinner;
+    protected RecipeRecyclerViewAdapter mRecyclerViewAdapter;
+    protected String[] mSortParams;
+    protected FirebaseDatabase mFBDB;
+
     protected Toolbar mToolbar;
     protected SearchView mSearchView;
-    private MenuItem mSearchItem;
+    protected MenuItem mSearchItem;
+    protected SwipeRefreshLayout mSwipeRefreshLayout;
+
+    protected OnRecipeLikeFragmentInteractionListener mLikeListener;
+
+    protected int mSortType;
+    protected boolean mFilter;
 
     public RecipesFragment() {
     }
 
-    public static RecipesFragment newInstance(String sharedPreferences, boolean filter) {
+    public static RecipesFragment newInstance(boolean filter) {
         RecipesFragment fragment = new RecipesFragment();
         Bundle args = new Bundle();
-        args.putInt(SORT_TYPE, 0);
-        args.putBoolean(ARG_FILTER, filter);
-        args.putString(SHARED_PREFERENCES, sharedPreferences);
+        fragment.mFilter = filter;
+        fragment.mSortType = 0;
         fragment.setArguments(args);
         return fragment;
     }
@@ -112,27 +102,12 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        isOnline = isOnline();
-        recipes = new ArrayList<>();
-        if (getArguments() != null) {
-            filter = getArguments().getBoolean(ARG_FILTER);
-            sortType = getArguments().getInt(SORT_TYPE);
-            shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
-        }
-        if (savedInstanceState != null) {
-            filter = savedInstanceState.getBoolean(ARG_FILTER);
-            sortType = savedInstanceState.getInt(SORT_TYPE);
-            shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
-        }
 
+        mRecyclerViewAdapter = new RecipeRecyclerViewAdapter(sharedPreferences, mListListener, mLikeListener, this, mFilter);
 
-        path = getActivity().getApplicationContext().getFilesDir().getPath() + RECIPES_SER;
-
-        recyclerViewAdapter = new RecipeRecyclerViewAdapter(shp, mListListener, mLikeListener, this, filter);
-
-        if (isOnline) {
-            db = FirebaseDatabase.getInstance();
-            DatabaseReference recipesRef = db.getReference().child(RECIPES);
+        if (isOnline()) {
+            mFBDB = FirebaseDatabase.getInstance();
+            DatabaseReference recipesRef = mFBDB.getReference().child(RECIPES_REF);
             recipesRef.addListenerForSingleValueEvent(new CustomRecipeValueEventListener());
         }
     }
@@ -141,10 +116,8 @@ public class RecipesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recipe_list, container, false);
-        final SwipeRefreshLayout srl = view.findViewById(R.id.refresh_list);
 
-        mToolbar = view.findViewById(R.id.toolbar_recipe_list);
-        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
+        mSwipeRefreshLayout = view.findViewById(R.id.refresh_list);
 
         Context context = view.getContext();
         final RecyclerView recyclerView = view.findViewById(R.id.recipe_adapter);
@@ -152,15 +125,15 @@ public class RecipesFragment extends Fragment {
 
 
         recyclerView.setItemAnimator(new LandingAnimator());
-        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setAdapter(mRecyclerViewAdapter);
 
-        sortParams = getResources().getStringArray(R.array.sort_params);
+        mSortParams = getResources().getStringArray(R.array.sort_params);
 
-        sortSpinner = view.findViewById(R.id.sort_spinner);
-        final SortSpinnerCustomAdapter spinnerCustomAdapter = new SortSpinnerCustomAdapter(view.getContext(), R.layout.sort_spinner_item, sortParams);
+        mSortSpinner = view.findViewById(R.id.sort_spinner);
+        final SortSpinnerCustomAdapter spinnerCustomAdapter = new SortSpinnerCustomAdapter(view.getContext(), R.layout.sort_spinner_item, mSortParams);
         spinnerCustomAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sortSpinner.setAdapter(spinnerCustomAdapter);
-        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mSortSpinner.setAdapter(spinnerCustomAdapter);
+        mSortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             boolean isFirstTime = true;
 
@@ -170,8 +143,8 @@ public class RecipesFragment extends Fragment {
                     isFirstTime = false;
                     return;
                 }
-                sortType = i;
-                recyclerViewAdapter.sort(i);
+                mSortType = i;
+                mRecyclerViewAdapter.sort(i);
             }
 
             @Override
@@ -180,36 +153,26 @@ public class RecipesFragment extends Fragment {
             }
         });
 
-        srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                isOnline = isOnline();
                 writeRecipeList();
-                recyclerViewAdapter.clear();
-                if (isOnline) {
-                    DatabaseReference recipesRef = db.getReference().child(RECIPES);
+                mRecyclerViewAdapter.clear();
+                if (isOnline()) {
+                    DatabaseReference recipesRef = mFBDB.getReference().child(RECIPES_REF);
                     recipesRef.addListenerForSingleValueEvent(new CustomRecipeValueEventListener());
                 } else {
                     readRecipeList();
                     Toast.makeText(getActivity(), R.string.network_problem, Toast.LENGTH_SHORT).show();
                 }
-                recyclerViewAdapter.sort(sortType);
-                srl.setRefreshing(false);
+                mRecyclerViewAdapter.sort(mSortType);
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
-
-        /*      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            view.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    v.removeOnLayoutChangeListener(this);
-                }
-            });
-        }*/
+//        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
 
         return view;
     }
@@ -231,7 +194,7 @@ public class RecipesFragment extends Fragment {
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    recyclerViewAdapter.getFilter().filter(newText);
+                    mRecyclerViewAdapter.getFilter().filter(newText);
                     return true;
                 }
             });
@@ -263,7 +226,7 @@ public class RecipesFragment extends Fragment {
         Objects.requireNonNull(getView()).post(new Runnable() {
             @Override
             public void run() {
-                if (!isOnline)
+                if (!isOnline())
                     readRecipeList();
             }
         });
@@ -273,21 +236,11 @@ public class RecipesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if ((context instanceof OnRecipeListFragmentInteractionListener) && (context instanceof OnRecipeLikeFragmentInteractionListener)) {
-            mListListener = (OnRecipeListFragmentInteractionListener) context;
-            mLikeListener = (OnRecipeLikeFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
 
-    @Override
-    public void onSaveInstanceState(@NotNull Bundle outState) {
-        outState.putBoolean(ARG_FILTER, filter);
-        outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
-        outState.putInt(SORT_TYPE, sortType);
-        super.onSaveInstanceState(outState);
+        mListListener = (OnRecipeListFragmentInteractionListener) context;
+        mLikeListener = (OnRecipeLikeFragmentInteractionListener) context;
+
+        mPath = context.getApplicationContext().getFilesDir().getPath() + RECIPES_SERIALIZED_PATH;
     }
 
     @Override
@@ -308,31 +261,13 @@ public class RecipesFragment extends Fragment {
         });
     }
 
-    void writeRecipeList() {
-        for (Recipe recipe : recipes) {
-            writeRecipe(recipe, recipe.getId());
-        }
-    }
-
-    void writeRecipe(Recipe recipe, int id) {
-        try {
-            FileOutputStream fout = new FileOutputStream(path + id);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(recipe);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     void readRecipeList() {
-        recipes.clear();
+        mRecipeList.clear();
         int iter = 0;
         Recipe recipe;
         while (true) {
             if ((recipe = readRecipe(iter++)) != null)
-                recipes.add(recipe);
+                mRecipeList.add(recipe);
             else
                 break;
         }
@@ -342,14 +277,14 @@ public class RecipesFragment extends Fragment {
     Recipe readRecipe(int id) {
         Recipe recipe = null;
         try {
-            FileInputStream streamIn = new FileInputStream(path + id);
+            FileInputStream streamIn = new FileInputStream(mPath + id);
             ObjectInputStream objectinputstream = new ObjectInputStream(streamIn);
             recipe = (Recipe) objectinputstream.readObject();
-            if (filter) {
-                if (shp.getBoolean("recipe_fav_" + recipe.getId(), false))
-                    recyclerViewAdapter.addOrChange(recipe);
+            if (mFilter) {
+                if (sharedPreferences.getBoolean("recipe_fav_" + recipe.getId(), false))
+                    mRecyclerViewAdapter.addOrChange(recipe);
             } else
-                recyclerViewAdapter.addOrChange(recipe);
+                mRecyclerViewAdapter.addOrChange(recipe);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -360,48 +295,40 @@ public class RecipesFragment extends Fragment {
         return recipe;
     }
 
-    public interface OnRecipeListFragmentInteractionListener {
-        void onRecipeListFragmentInteraction(Recipe item, RecipesFragment recipesFragment);
-    }
-
-    public interface OnRecipeLikeFragmentInteractionListener {
-        void onRecipeLikeFragmentInteraction(Recipe item);
-    }
-
     class CustomRecipeValueEventListener implements ValueEventListener {
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            recipes.clear();
+            mRecipeList.clear();
             String offlineLike;
             String onlineLike;
             String viewsNum;
             for (DataSnapshot unit : dataSnapshot.getChildren()) {
                 Recipe recipe = unit.getValue(Recipe.class);
-                offlineLike = RECIPES_OFFLINE_LIKE + recipe.getId();
-                onlineLike = RECIPES_ONLINE_LIKE + recipe.getId();
+                offlineLike = RECIPES_OFFLINE_LIKE_TAG + recipe.getId();
+                onlineLike = RECIPES_ONLINE_LIKE_TAG + recipe.getId();
                 viewsNum = "views_dif_" + recipe.getId();
-                if (shp.getBoolean(offlineLike, false) && !shp.getBoolean(onlineLike, false)) {
+                if (sharedPreferences.getBoolean(offlineLike, false) && !sharedPreferences.getBoolean(onlineLike, false)) {
                     recipe.setRate(recipe.getRate() + 1);
-                } else if (!shp.getBoolean(offlineLike, false) && shp.getBoolean(onlineLike, false)) {
+                } else if (!sharedPreferences.getBoolean(offlineLike, false) && sharedPreferences.getBoolean(onlineLike, false)) {
                     recipe.setRate(recipe.getRate() - 1);
                 }
-                recipe.setViews(recipe.getViews() + shp.getInt(viewsNum, 0));
-                db.getReference(RECIPES + "/" + String.valueOf(recipe.getId()) + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, shp));
-                db.getReference(RECIPES + "/" + String.valueOf(recipe.getId()) + "/views").addListenerForSingleValueEvent(new ViewsValueChanged(viewsNum, shp));
+                recipe.setViews(recipe.getViews() + sharedPreferences.getInt(viewsNum, 0));
+                mFBDB.getReference(RECIPES_REF + "/" + String.valueOf(recipe.getId()) + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, sharedPreferences));
+                mFBDB.getReference(RECIPES_REF + "/" + String.valueOf(recipe.getId()) + "/views").addListenerForSingleValueEvent(new ViewsValueChanged(viewsNum, sharedPreferences));
 
-                if (filter) {
-                    if (shp.getBoolean("recipe_fav_" + recipe.getId(), false))
-                        recyclerViewAdapter.addOrChange(recipe);
-                } else recyclerViewAdapter.addOrChange(recipe);
-                if (recipes.contains(recipe))
-                    recipes.set(recipe.getId(), recipe);
+                if (mFilter) {
+                    if (sharedPreferences.getBoolean("recipe_fav_" + recipe.getId(), false))
+                        mRecyclerViewAdapter.addOrChange(recipe);
+                } else mRecyclerViewAdapter.addOrChange(recipe);
+                if (mRecipeList.contains(recipe))
+                    mRecipeList.set(recipe.getId(), recipe);
                 else
-                    recipes.add(recipe);
+                    mRecipeList.add(recipe);
             }
-            if (sortType > 0) {
-                sortSpinner.setSelection(sortType);
-                recyclerViewAdapter.sort(sortType);
+            if (mSortType > 0) {
+                mSortSpinner.setSelection(mSortType);
+                mRecyclerViewAdapter.sort(mSortType);
             }
             mProgressBar.setVisibility(View.GONE);
 
@@ -443,7 +370,7 @@ public class RecipesFragment extends Fragment {
             ImageView iv = view.findViewById(R.id.sort_type);
             TextView tv = view.findViewById(R.id.sort_param_name);
 
-            tv.setText(sortParams[position]);
+            tv.setText(mSortParams[position]);
             if (position != 0) {
                 int id = position % 2 == 0 ? R.drawable.sort_descending : R.drawable.sort_ascending;
                 Picasso.with(this.getContext()).load(id).into(iv);
@@ -453,22 +380,7 @@ public class RecipesFragment extends Fragment {
     }
 
 
-    public boolean isOnline() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean show) {
+    private void animateSearchToolbar(int numberOfMenuIcon, boolean containsOverflow, boolean show) {
         mToolbar.setBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.white));
         getActivity().getWindow().setStatusBarColor(ContextCompat.getColor(getActivity(), R.color.quantum_grey_600));
 

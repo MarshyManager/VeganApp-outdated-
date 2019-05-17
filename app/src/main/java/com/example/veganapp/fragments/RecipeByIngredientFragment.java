@@ -44,11 +44,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RecipeByIngredientFragment extends Fragment {
 
-    final static String FOUNDED_RECIPES = "founded_recipes";
+    final static String FOUNDED_RECIPES_FRAGMENT_TAG = "founded_recipes";
 
     protected List<Recipe> recipes;
-    protected List<Boolean> savedBool;
-    protected List<Ingredient> savedIngredients;
     protected Set<Ingredient> uniqueIngredients;
     protected Toolbar mToolbar;
     protected String path;
@@ -110,7 +108,7 @@ public class RecipeByIngredientFragment extends Fragment {
             public void onClick(View view) {
                 FragmentTransaction ftrans = getActivity().getSupportFragmentManager().beginTransaction();
                 FoundedRecipesFragment frf = FoundedRecipesFragment.newInstance(chosenIngredientsAdapter.getIngredients(), chosenIngredientsAdapter.getAddTypeList());
-                ftrans.replace(R.id.fragment_container, frf).addToBackStack(FOUNDED_RECIPES).commit();
+                ftrans.replace(R.id.fragment_container, frf).addToBackStack(FOUNDED_RECIPES_FRAGMENT_TAG).commit();
             }
         });
         return view;
