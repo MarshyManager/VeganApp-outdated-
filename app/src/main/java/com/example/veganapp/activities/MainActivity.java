@@ -9,11 +9,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.example.veganapp.fragments.BaseRecipesFragment;
 import com.example.veganapp.fragments.CookInstructionFragment;
 import com.example.veganapp.fragments.DailyMenuFragment;
 import com.example.veganapp.fragments.RecipeByIngredientFragment;
-import com.example.veganapp.support_classes.ImportantConstants;
 import com.example.veganapp.support_classes.LikeValueChanged;
 import com.example.veganapp.support_classes.ViewsValueChanged;
 import com.google.android.libraries.places.api.Places;
@@ -46,15 +44,14 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.veganapp.support_classes.ImportantConstants.FOUNDED_RECIPES;
-import static com.example.veganapp.support_classes.ImportantConstants.FULL_RECIPE;
-import static com.example.veganapp.support_classes.ImportantConstants.RECIPES;
-import static com.example.veganapp.support_classes.ImportantConstants.RESTAURANTS;
-
-public class MainActivity extends AppCompatActivity implements BaseRecipesFragment.OnRecipeListFragmentInteractionListener,
-        BaseRecipesFragment.OnRecipeLikeFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements RecipesFragment.OnRecipeListFragmentInteractionListener,
+        RecipesFragment.OnRecipeLikeFragmentInteractionListener {
 
     static final String APP_PREFERENCES = "settings";
+    static final String RECIPES = "recipes";
+    static final String RESTAURANTS = "restaurants";
+    static final String FULL_RECIPE = "full_recipe";
+    static final String FOUNDED_RECIPES = "founded_recipes";
     protected static final String RECIPES_SER = "/recipes_ser";
 
     protected List<Recipe> recipes;
@@ -62,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
     protected FirebaseDatabase mDB;
     protected FragmentManager fm;
     protected FragmentTransaction ftrans;
-    protected SharedPreferences sharedPreferences;
+    protected SharedPreferences shp;
     protected DatabaseReference DBRecipes;
     protected DatabaseReference DBRestaurants;
     protected ProgressBar mProgressBar;
@@ -82,11 +79,11 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
             ftrans = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_recipe_list:
-                    recipesFragment = RecipesFragment.newInstance( false);
+                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, false);
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
                 case R.id.navigation_favourite:
-                    recipesFragment = RecipesFragment.newInstance(true);
+                    recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, true);
                     ftrans.replace(R.id.fragment_container, recipesFragment).commit();
                     return true;
                 case R.id.navigation_pick_recipe:
@@ -94,8 +91,10 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
                     mProgressBar.setVisibility(View.GONE);
                     ftrans.replace(R.id.fragment_container, rbiFragment).commit();
                     return true;
+
                 case R.id.navigation_create_menu:
                     DailyMenuFragment dailyMenuFragment = DailyMenuFragment.newInstance();
+                    mProgressBar.setVisibility(View.GONE);
                     ftrans.replace(R.id.fragment_container, dailyMenuFragment).commit();
                     return true;
                 case R.id.navigation_map:
@@ -117,9 +116,9 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
 
         Places.initialize(getApplicationContext(), "AIzaSyCQ_4795C2OlIunuSiI7ku224GWfAVzIcY");
 
-        sharedPreferences = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
+        shp = getSharedPreferences(APP_PREFERENCES, MODE_PRIVATE);
 
-        mProgressBar = findViewById(R.id.loading_data_progress_bar);
+        mProgressBar = findViewById(R.id.load_data);
 
         mDB = FirebaseDatabase.getInstance();
         DBRecipes = mDB.getReference(RECIPES);
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
         fm = getSupportFragmentManager();
         if (fm.getFragments().size() == 0) {
             ftrans = fm.beginTransaction();
-            RecipesFragment recipesFragment = RecipesFragment.newInstance( false);
+            RecipesFragment recipesFragment = RecipesFragment.newInstance(APP_PREFERENCES, false);
             ftrans.replace(R.id.fragment_container, recipesFragment).commit();
         }
 
@@ -162,25 +161,35 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
     }
 
     @Override
-    public void onRecipeListFragmentInteraction(Recipe item, BaseRecipesFragment baseRecipesFragment) {
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onRecipeListFragmentInteraction(Recipe item, RecipesFragment recipesFragment) {
         ftrans = getSupportFragmentManager().beginTransaction();
-        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, baseRecipesFragment);
+        CookInstructionFragment cif = CookInstructionFragment.newInstance(item, APP_PREFERENCES, recipesFragment);
         ftrans.replace(R.id.fragment_container, cif).addToBackStack(FULL_RECIPE).commit();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences.Editor editor = shp.edit();
         final String viewsNum = "views_dif_" + item.getId();
-        editor.putInt(viewsNum, sharedPreferences.getInt(viewsNum, 0) + 1);
+        editor.putInt(viewsNum, shp.getInt(viewsNum, 0) + 1);
         editor.apply();
-        mDB.getReference(RECIPES + "/" + item.getId() + "/views")
-                .addListenerForSingleValueEvent(new ViewsValueChanged(viewsNum, sharedPreferences));
+        mDB.getReference(RECIPES + "/" + String.valueOf(item.getId()) + "/views")
+                .addListenerForSingleValueEvent(new ViewsValueChanged(viewsNum, shp));
     }
 
     @Override
     public void onRecipeLikeFragmentInteraction(Recipe item) {
-        final String offlineLike = ImportantConstants.RECIPES_OFFLINE_LIKE_TAG + item.getId();
-        final String onlineLike = ImportantConstants.RECIPES_ONLINE_LIKE_TAG + item.getId();
+        final String offlineLike = "recipe_offline_like_" + item.getId();
+        final String onlineLike = "recipe_online_like_" + item.getId();
         int dif;
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if (!sharedPreferences.getBoolean(offlineLike, false)) {
+        SharedPreferences.Editor editor = shp.edit();
+        if (!shp.getBoolean(offlineLike, false)) {
             editor.putBoolean(offlineLike, true);
             dif = +1;
         } else {
@@ -189,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
         }
         editor.apply();
         item.setRate(item.getRate() + dif);
-        mDB.getReference(RECIPES + "/" + item.getId() + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, sharedPreferences));
+        mDB.getReference(RECIPES + "/" + String.valueOf(item.getId()) + "/rate").addListenerForSingleValueEvent(new LikeValueChanged(offlineLike, onlineLike, shp));
     }
 
     public static void hideKeyboard(Activity activity) {
@@ -210,8 +219,8 @@ public class MainActivity extends AppCompatActivity implements BaseRecipesFragme
             super.onBackPressed();
     }
 
-    public SharedPreferences getSharedPreferences() {
-        return sharedPreferences;
+    public SharedPreferences getShp() {
+        return shp;
     }
 }
 

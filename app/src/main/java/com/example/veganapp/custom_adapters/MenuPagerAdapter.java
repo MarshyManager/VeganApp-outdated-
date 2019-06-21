@@ -13,7 +13,6 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.example.veganapp.R;
 import com.example.veganapp.db_classes.Recipe;
-import com.example.veganapp.fragments.BaseRecipesFragment;
 import com.example.veganapp.fragments.RecipesFragment;
 import com.squareup.picasso.Picasso;
 
@@ -23,11 +22,11 @@ public class MenuPagerAdapter extends PagerAdapter {
 
     List<Recipe> recipes;
     LayoutInflater inflater;
-    BaseRecipesFragment parentFragment;
-    BaseRecipesFragment.OnRecipeListFragmentInteractionListener mListListener;
+    RecipesFragment parentFragment;
+    RecipesFragment.OnRecipeListFragmentInteractionListener mListListener;
 
 
-    public MenuPagerAdapter(List<Recipe> recipes, BaseRecipesFragment parentFragment,
+    public MenuPagerAdapter(List<Recipe> recipes, RecipesFragment parentFragment,
             RecipesFragment.OnRecipeListFragmentInteractionListener mListListener) {
         this.recipes = recipes;
         this.mListListener = mListListener;

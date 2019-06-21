@@ -73,7 +73,7 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
         } else {
             int index = recipes.indexOf(recipe);
             recipes.set(index, recipe);
-            recipesFiltered.add(recipe);
+            recipesFiltered.set(index, recipe);
             notifyItemChanged(index);
         }
     }

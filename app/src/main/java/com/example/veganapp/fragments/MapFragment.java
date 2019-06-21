@@ -244,28 +244,7 @@ public class MapFragment extends Fragment implements
         }
 
         private void render(Marker marker, View view, int pos) {
-            final ImageView iv = view.findViewById(R.id.place_image);
 
-            FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(places.get(pos).getPhotoMetadatas().get(0))
-                    .setMaxWidth(500) // Optional.
-                    .setMaxHeight(300) // Optional.
-                    .build();
-            placesClient.fetchPhoto(photoRequest).addOnSuccessListener(new OnSuccessListener<FetchPhotoResponse>() {
-                @Override
-                public void onSuccess(FetchPhotoResponse fetchPhotoResponse) {
-                    Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                    iv.setImageBitmap(bitmap);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    if (e instanceof ApiException) {
-                        ApiException apiException = (ApiException) e;
-                        int statusCode = apiException.getStatusCode();
-                    }
-                }
-            });
-            String title = marker.getTitle();
             TextView titleUi = view.findViewById(R.id.place_title);
             titleUi.setText(places.get(pos).getName());
             TextView openHours = view.findViewById(R.id.place_open_hours);

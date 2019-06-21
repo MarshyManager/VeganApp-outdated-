@@ -43,7 +43,7 @@ public class FoundedRecipesFragment extends RecipesFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = ((MainActivity) getActivity()).getSharedPreferences();
+        shp = ((MainActivity) getActivity()).getShp();
     }
 
     @Override
@@ -52,11 +52,11 @@ public class FoundedRecipesFragment extends RecipesFragment {
         View view = inflater.inflate(R.layout.fragment_foundedrecipes_list, container, false);
 
         infoMessage = view.findViewById(R.id.message_no_recipes_found);
-        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.loading_data_progress_bar);
+        mProgressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.load_data);
         Context context = view.getContext();
         RecyclerView recyclerView = view.findViewById(R.id.founded_recipes);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        foundedRecipes = new RecipeRecyclerViewAdapter(sharedPreferences, mListListener, mLikeListener, this, false);
+        foundedRecipes = new RecipeRecyclerViewAdapter(shp, mListListener, mLikeListener, this, false);
         recyclerView.setAdapter(foundedRecipes);
         return view;
     }
@@ -67,13 +67,13 @@ public class FoundedRecipesFragment extends RecipesFragment {
         getView().post(new Runnable() {
             @Override
             public void run() {
-                /* mRecipeList – поле класса – список всех имеющихся рецептов,
+                /* recipes – поле класса – список всех имеющихся рецептов,
                 givenIngredients – поле класса – список всех имеющихся рецептов,
                 addTypeList – поле класса – список логических переменных
                 (обозначающих желательность/нежелательность ингредиентов),
                 foundedRecipes - адаптер содержащий найденные рецепты */
                 readRecipeList();
-                List<Recipe> temp = new ArrayList<>(mRecipeList);
+                List<Recipe> temp = new ArrayList<>(recipes);
                 for (Recipe recipe : temp) {
                     int counter = 0;
                     boolean containsBanned = false;

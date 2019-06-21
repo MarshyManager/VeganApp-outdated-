@@ -21,11 +21,10 @@ import com.squareup.picasso.Picasso;
 
 import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
 
-import static com.example.veganapp.support_classes.ImportantConstants.RECIPE;
-
 public class CookInstructionFragment extends Fragment {
 
-    protected static final String ARG_SHARED_PREFERENCES = "shared_preferences";
+    protected static final String RECIPE = "recipe";
+    protected static final String SHARED_PREFERENCES = "shared_preferences";
 
     protected Recipe recipe;
     protected TextView mRateNum;
@@ -39,18 +38,18 @@ public class CookInstructionFragment extends Fragment {
     protected ImageView mRateImage;
     protected SharedPreferences shp;
     protected RecipesFragment.OnRecipeLikeFragmentInteractionListener mLikeListener;
-    protected BaseRecipesFragment parentFragment;
+    protected RecipesFragment parentFragment;
 
     public CookInstructionFragment() {
     }
 
-    public static CookInstructionFragment newInstance(Recipe recipe, String sharedPreferences, BaseRecipesFragment parentFragment) {
+    public static CookInstructionFragment newInstance(Recipe recipe, String sharedPreferences, RecipesFragment parentFragment) {
         CookInstructionFragment fragment = new CookInstructionFragment();
 
         Bundle args = new Bundle();
         fragment.recipe = recipe;
         fragment.parentFragment = parentFragment;
-        args.putString(ARG_SHARED_PREFERENCES, sharedPreferences);
+        args.putString(SHARED_PREFERENCES, sharedPreferences);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,9 +59,9 @@ public class CookInstructionFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             recipe = (Recipe) savedInstanceState.getSerializable(RECIPE);
-            shp = getActivity().getSharedPreferences(savedInstanceState.getString(ARG_SHARED_PREFERENCES), Context.MODE_PRIVATE);
+            shp = getActivity().getSharedPreferences(savedInstanceState.getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
         } else if (getArguments() != null) {
-            shp = getActivity().getSharedPreferences(getArguments().getString(ARG_SHARED_PREFERENCES), Context.MODE_PRIVATE);
+            shp = getActivity().getSharedPreferences(getArguments().getString(SHARED_PREFERENCES), Context.MODE_PRIVATE);
         }
     }
 
@@ -134,7 +133,7 @@ public class CookInstructionFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(RECIPE, recipe);
-        outState.putString(ARG_SHARED_PREFERENCES, getArguments().getString(ARG_SHARED_PREFERENCES));
+        outState.putString(SHARED_PREFERENCES, getArguments().getString(SHARED_PREFERENCES));
         super.onSaveInstanceState(outState);
     }
 
